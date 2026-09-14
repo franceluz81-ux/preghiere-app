@@ -27,6 +27,13 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; min-height: 100vh; overflow-x: hidden; }
 
+  /* SFONDO SACRO */
+  #sacred-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; opacity: 0.07;
+  }
+  .screen { position: relative; z-index: 1; }
+
   /* SCREENS */
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; flex-direction: column; }
@@ -294,6 +301,9 @@
 </head>
 <body>
 
+<!-- SFONDO SACRO -->
+<canvas id="sacred-bg"></canvas>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -315,10 +325,10 @@
     🔔 Imposta promemoria preghiere
   </div>
 
-  <div class="section-title">📿 Corone e Rosari</div>
+  <div class="section-title">🌹 Corone e Rosari</div>
   <div class="grid">
     <div class="card" onclick="avviaPreghiera('rosario')">
-      <div class="emoji">📿</div>
+      <div class="emoji">🌹</div>
       <div class="title">Santo Rosario</div>
       <div class="sub">Misteri del giorno</div>
     </div>
@@ -336,6 +346,11 @@
       <div class="emoji">🕊️</div>
       <div class="title">Coroncina San Raffaele</div>
       <div class="sub">Arcangelo guaritore</div>
+    </div>
+    <div class="card" onclick="avviaPreghiera('san-raffaele-completa')">
+      <div class="emoji">✨</div>
+      <div class="title">Coroncina San Raffaele (completa)</div>
+      <div class="sub">Testo integrale</div>
     </div>
   </div>
 
@@ -383,6 +398,46 @@
       <div class="emoji">✨</div>
       <div class="info">
         <div class="title">Preghiere Madonna di Medjugorje (Jelena Vasilj)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">🌹 Medjugorje — Consacrazioni</div>
+  <div class="grid">
+    <div class="card consacrazione-card" onclick="avviaPreghiera('cons-sacro-cuore-medj')">
+      <div class="emoji">❤️‍🔥</div>
+      <div class="info">
+        <div class="title">Consacrazione al Sacro Cuore di Gesù</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('cons-cuore-immacolato')">
+      <div class="emoji">💙</div>
+      <div class="info">
+        <div class="title">Consacrazione al Cuore Immacolato di Maria</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('madre-di-bonta')">
+      <div class="emoji">🌸</div>
+      <div class="info">
+        <div class="title">Madre di Bontà d'Amore e di Misericordia</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('supplica-a-dio')">
+      <div class="emoji">🙏</div>
+      <div class="info">
+        <div class="title">Supplica a Dio</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('preghiera-ammalato')">
+      <div class="emoji">🕊️</div>
+      <div class="info">
+        <div class="title">Preghiera per l'Ammalato</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('cons-famiglia-giuseppe')">
+      <div class="emoji">⚜️</div>
+      <div class="info">
+        <div class="title">Consacrazione della Famiglia a San Giuseppe</div>
       </div>
     </div>
   </div>
@@ -547,21 +602,30 @@ function buildRosario() {
 }
 
 const CATALOGO = {
-  'rosario': { title: '📿 Santo Rosario', buildFn: buildRosario, fineMsg: 'Il Santo Rosario è completato.\nMaria Santissima ti benedica e protegga la tua famiglia.' },
+  'rosario': { title: '🌹 Santo Rosario', buildFn: buildRosario, fineMsg: 'Il Santo Rosario è completato.\nMaria Santissima ti benedica e protegga la tua famiglia.' },
 
   'corona-angelica': { title: '👼 Corona Angelica', steps: [
-    { label: 'Inizio', title: 'Corona Angelica', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
-    { label: 'Invocazione', title: 'Invocazione iniziale', text: 'O Dio, vieni a salvarmi.\nSignore, vieni presto in mio aiuto.\nGloria al Padre...' },
-    { label: '1° Mistero', title: '1° — L\'Annunciazione', instruction: 'Il Signore manda l\'Arcangelo Gabriele a Maria', text: 'Ave Maria... (×3)\n\nSanto Michele Arcangelo, difendici nel combattimento, sii nostro sostegno contro le insidie e la malvagità del demonio. Amen.' },
-    { label: '2° Mistero', title: '2° — La Nascita di Gesù', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: '3° Mistero', title: '3° — La Risurrezione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: '4° Mistero', title: '4° — L\'Ascensione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: '5° Mistero', title: '5° — La Pentecoste', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: '6° Mistero', title: '6° — L\'Assunzione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: '7° Mistero', title: '7° — L\'Incoronazione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
-    { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
-    { label: 'Finale', title: 'Preghiera finale', text: 'Sotto la tua protezione cerchiamo rifugio,\nSanta Madre di Dio.\nNon disprezzare le suppliche\ndi noi che siamo nella prova,\nma liberaci da ogni pericolo,\no Vergine gloriosa e benedetta.\nAmen.' }
-  ], fineMsg: 'La Corona Angelica è terminata.\nGli Angeli del Signore ti custodiscano.' },
+    { label: 'Inizio', title: 'Corona Angelica', instruction: 'Corona in onore dei nove Cori degli Angeli', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\nO Dio, vieni a salvarmi.\nSignore, vieni presto in mio aiuto.\nGloria al Padre e al Figlio e allo Spirito Santo.\nCome era nel principio, ora e sempre, nei secoli dei secoli. Amen.' },
+    { label: '1° Coro', title: '1° Coro — I Serafini', instruction: 'In onore dei Serafini che ardono d\'amore per Dio', text: 'Regina degli Angeli, Madre di bell\'amore,\nper i meriti dei Serafini che ardono di carità\ndavanti al trono di Dio,\nfate che arda nel mio cuore il fuoco del divino amore.\nAve Maria... (×3)' },
+    { label: '1° Coro', title: '1° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '2° Coro', title: '2° Coro — I Cherubini', instruction: 'In onore dei Cherubini che contemplano la sapienza di Dio', text: 'Regina degli Angeli, per i meriti dei Cherubini\nche godono la pienezza della sapienza divina,\nfate che io conosca Dio, me stesso,\ne la vanità delle cose del mondo.\nAve Maria... (×3)' },
+    { label: '2° Coro', title: '2° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '3° Coro', title: '3° Coro — I Troni', instruction: 'In onore dei Troni che riposano in Dio', text: 'Regina degli Angeli, per i meriti dei Troni,\nnei quali Dio si riposa,\nfate che io diventi dimora degna\ndi Dio Padre, Figlio e Spirito Santo.\nAve Maria... (×3)' },
+    { label: '3° Coro', title: '3° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '4° Coro', title: '4° Coro — Le Dominazioni', instruction: 'In onore delle Dominazioni che regolano le schiere angeliche', text: 'Regina degli Angeli, per i meriti delle Dominazioni\nche regolano i cori degli Angeli,\nfate che io sappia dominarmi\ne vincere le mie passioni.\nAve Maria... (×3)' },
+    { label: '4° Coro', title: '4° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '5° Coro', title: '5° Coro — Le Virtù', instruction: 'In onore delle Virtù che compiono i miracoli di Dio', text: 'Regina degli Angeli, per i meriti delle Virtù\nche operano i prodigi per gloria di Dio,\nfate che io pratichi le virtù cristiane\ne riceva le grazie di cui ho bisogno.\nAve Maria... (×3)' },
+    { label: '5° Coro', title: '5° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '6° Coro', title: '6° Coro — Le Potestà', instruction: 'In onore delle Potestà che combattono il demonio', text: 'Regina degli Angeli, per i meriti delle Potestà\nche trattengono la furia del demonio,\nfate che io vinca le tentazioni\ne resista agli assalti del maligno.\nAve Maria... (×3)' },
+    { label: '6° Coro', title: '6° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '7° Coro', title: '7° Coro — I Principati', instruction: 'In onore dei Principati che presiedono alle nazioni', text: 'Regina degli Angeli, per i meriti dei Principati\nche presiedono ai regni e alle nazioni,\nfate che io serva Dio con fedeltà\ne lavori per il bene della santa Chiesa.\nAve Maria... (×3)' },
+    { label: '7° Coro', title: '7° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '8° Coro', title: '8° Coro — Gli Arcangeli', instruction: 'In onore degli Arcangeli messaggeri di Dio', text: 'Regina degli Angeli, per i meriti degli Arcangeli\nMichele, Gabriele e Raffaele,\nfate che io riceva le consolazioni celesti\nnelle mie pene e nelle mie tentazioni.\nAve Maria... (×3)' },
+    { label: '8° Coro', title: '8° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '9° Coro', title: '9° Coro — Gli Angeli Custodi', instruction: 'In onore degli Angeli Custodi', text: 'Regina degli Angeli, per i meriti degli Angeli Custodi\nche ci custodiscono giorno e notte,\nfate che io viva e muoia\ncompiendola volontà di Dio\ne giunga felicemente in Paradiso.\nAve Maria... (×3)' },
+    { label: '9° Coro', title: '9° Coro — Ave Maria ×3', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: 'Finale', title: 'Preghiera finale', text: 'Sotto la tua protezione cerchiamo rifugio,\nSanta Madre di Dio.\nNon disprezzare le suppliche\ndi noi che siamo nella prova,\nma liberaci da ogni pericolo,\no Vergine gloriosa e benedetta.\n\nAngeli e Arcangeli, Troni e Dominazioni,\nPrincipi e Potestà, Virtù dei cieli,\nCherubini e Serafini,\nlodate il Signore in eterno.\nAmen.' }
+  ], fineMsg: 'La Corona Angelica è terminata.\nI nove Cori degli Angeli ti custodiscano sempre.' },
 
   'divina-misericordia': { title: '❤️ Coroncina Divina Misericordia', steps: [
     { label: 'Inizio', title: 'Coroncina della Divina Misericordia', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\n"Gesù, confido in Te."' },
@@ -646,7 +710,85 @@ const CATALOGO = {
     { label: 'Credo', title: 'Credo degli Apostoli', text: PREGHIERE_BASE.credo.testo },
     { label: 'Atto di Contrizione', title: 'Atto di Contrizione', text: PREGHIERE_BASE.attoContrizione.testo },
     { label: 'Salve Regina', title: 'Salve Regina', text: 'Salve, o Regina, madre di misericordia,\nvita, dolcezza e speranza nostra, salve.\nA te ricorriamo, esuli figli di Eva;\na te sospiriamo gementi e piangenti\nin questa valle di lacrime.\nOrsù, dunque, avvocata nostra,\nrivolgi a noi gli occhi tuoi misericordiosi,\ne mostraci, dopo questo esilio, Gesù,\nfrutto benedetto del tuo seno.\nO clemente, o pia, o dolce Vergine Maria.\nAmen.' }
-  ], fineMsg: 'Preghiere completate. Dio ti benedica.' }
+  ], fineMsg: 'Preghiere completate. Dio ti benedica.' },
+
+  // ===== CORONCINA SAN RAFFAELE COMPLETA =====
+  'san-raffaele-completa': { title: '✨ Coroncina San Raffaele (completa)', steps: [
+    { label: 'Inizio', title: 'Coroncina in onore di San Raffaele Arcangelo', instruction: 'Testo integrale della Coroncina tradizionale', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\nO Dio, vieni a salvarmi.\nSignore, vieni presto in mio aiuto.\nGloria al Padre e al Figlio e allo Spirito Santo.\nCome era nel principio, ora e sempre,\nnei secoli dei secoli. Amen.' },
+    { label: 'Antifona', title: 'Antifona', text: 'San Raffaele Arcangelo,\ntu sei il medico di Dio,\ntu sei la guida dei pellegrini,\ntu sei il protettore degli sposi,\ntu sei il consolatore degli afflitti.\nPrega per noi presso il Signore.' },
+    { label: '1ª Stazione', title: '1ª — Raffaele e Tobia', instruction: 'Meditazione: Dio invia Raffaele come compagno a Tobiolo', text: 'O glorioso San Raffaele Arcangelo,\nche per divina disposizione accompagnasti Tobia\nnell\'incerto cammino lontano dalla patria,\nassistilo in ogni pericolo\ne riportalo sano e salvo a casa.\n\nSii anche tu il mio compagno di viaggio\nin questo pellegrinaggio della vita,\nguardami dai pericoli del corpo e dell\'anima,\ne conducimi alla patria celeste.\nAmen.' },
+    { label: '1ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '2ª Stazione', title: '2ª — Raffaele guarisce Tobi', instruction: 'Meditazione: Raffaele rende la vista al vecchio Tobi', text: 'O San Raffaele Arcangelo,\nche per comando di Dio guaristi Tobi dalla cecità,\nillumina gli occhi del mio spirito\naffinché veda chiaramente le vie di Dio\ne cammini nella sua luce.\n\nGuarisci le cecità del mio cuore,\nscaccia le tenebre dell\'ignoranza e del peccato,\nperché io possa sempre seguire il Signore\nnel cammino della salvezza.\nAmen.' },
+    { label: '2ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '3ª Stazione', title: '3ª — Raffaele libera Sara', instruction: 'Meditazione: Raffaele libera Sara dal demonio', text: 'O San Raffaele Arcangelo,\nche liberasti Sara dal demonio che la tormentava,\nlibera me e tutti i miei cari\nda ogni influsso e potere del maligno.\n\nSotto la tua protezione poniamo le nostre famiglie,\ni nostri matrimoni, le nostre case.\nAllontana da noi ogni male spirituale\ne ottienici la pace e la serenità del cuore.\nAmen.' },
+    { label: '3ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '4ª Stazione', title: '4ª — Raffaele rivela la sua identità', instruction: 'Meditazione: Raffaele si rivela inviato da Dio', text: 'O San Raffaele Arcangelo,\nche ti rivelasti come uno dei sette\nche stanno davanti a Dio,\nfa\' che io riconosca sempre la presenza di Dio\nnella mia vita e nella storia.\n\nDonami occhi di fede\npercepire l\'azione di Dio negli eventi,\nla sua presenza nei fratelli,\nla sua luce nel buio delle prove.\nAmen.' },
+    { label: '4ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '5ª Stazione', title: '5ª — Raffaele protegge i viaggiatori', instruction: 'Meditazione: Raffaele, angelo dei viaggiatori', text: 'O San Raffaele Arcangelo,\nprotettore di tutti i viaggiatori,\nproteggi coloro che sono in viaggio,\nche percorrono le strade del mondo,\nche attraversano mari e cieli.\n\nProteggi i lavoratori lontani da casa,\ni migranti e i rifugiati,\ni pellegrini che cercano Dio.\nRiportali sani e salvi\nalle loro famiglie e alla casa del Padre.\nAmen.' },
+    { label: '5ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '6ª Stazione', title: '6ª — Raffaele e la medicina divina', instruction: 'Meditazione: Raffaele, medico di Dio', text: 'O San Raffaele Arcangelo,\nnome che significa "Dio guarisce",\nmedico celeste inviato dal Signore,\nguarisci le nostre malattie del corpo\ne le infermità dell\'anima.\n\nAssisti i malati e i morenti,\nconforta chi soffre,\nstai vicino a chi è nei ospedali,\nporta loro la guarigione\nse è nella volontà di Dio,\ne la forza nella sofferenza.\nAmen.' },
+    { label: '6ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '7ª Stazione', title: '7ª — Raffaele e i giovani', instruction: 'Meditazione: Raffaele guida i giovani nella verità', text: 'O San Raffaele Arcangelo,\ncompagno e guida del giovane Tobiolo,\nprendi sotto la tua protezione i giovani\ndi questo tempo confuso.\n\nAllontanali dalle insidie del mondo,\nguardali dalle cattive compagnie,\norientali verso il vero amore,\nfa\' che trovino nel Signore\nil senso della loro vita\ne la gioia autentica del cuore.\nAmen.' },
+    { label: '7ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '8ª Stazione', title: '8ª — Raffaele e le famiglie', instruction: 'Meditazione: Raffaele, custode del matrimonio e della famiglia', text: 'O San Raffaele Arcangelo,\nche preparasti il matrimonio di Tobiolo e Sara,\ncustodisci tutte le famiglie cristiane.\n\nProteggi i matrimoni dall\'infedeltà e dalla discordia,\nbendici le case e le famiglie,\ndona la pace ai coniugi,\nproteggi i figli dagli inganni del mondo.\nFa\' che ogni famiglia diventi\nuna piccola chiesa domestica\ndove regna Dio.\nAmen.' },
+    { label: '8ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: '9ª Stazione', title: '9ª — Raffaele, angelo della preghiera', instruction: 'Meditazione: Raffaele porta le preghiere al trono di Dio', text: 'O San Raffaele Arcangelo,\nche porti le preghiere dei giusti\ndavanti al trono di Dio,\nprendi le mie povere preghiere\ne presentale al Signore.\n\nCopri le mie miserie con la tua gloria,\npurifica le mie intenzioni con il tuo fuoco,\npresenta a Dio il grido del mio cuore\ne ottienimi la grazia\ndi cui ho più bisogno.\nAmen.' },
+    { label: '9ª Stazione', title: 'Gloria al Padre ×3', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: 'Finale', title: 'Preghiera conclusiva', text: 'O San Raffaele Arcangelo,\nmedio di Dio, guaritore divino,\ncompagno dei pellegrini,\ncustode delle famiglie,\nprotettore dei giovani,\nangelo della preghiera:\n\nstai vicino a me e ai miei cari\nin ogni momento della vita.\nNell\'ora della malattia, consolaci.\nNel pericolo, proteggici.\nNell\'ora della morte, assistici.\nE dopo questa vita,\nconducti alla visione di Dio\nnella pace eterna del Paradiso.\n\nSan Raffaele Arcangelo, prega per noi.\nAmen.\n\nGloria al Padre e al Figlio\ne allo Spirito Santo.\nCome era nel principio,\nora e sempre,\nnei secoli dei secoli. Amen.' }
+  ], fineMsg: 'La Coroncina completa di San Raffaele Arcangelo è terminata.\nRaffaele, medico di Dio, ti guarisca e ti protegga.' },
+
+  // ===== MEDJUGORJE — CONSACRAZIONE AL SACRO CUORE =====
+  'cons-sacro-cuore-medj': { title: '❤️‍🔥 Consacrazione al Sacro Cuore di Gesù', steps: [
+    { label: 'Inizio', title: 'Consacrazione al Sacro Cuore di Gesù', instruction: 'Preghiera insegnata dalla Madonna di Medjugorje a Jelena Vasilj', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Parte I', title: 'Adorazione', text: 'Gesù, sappiamo che Tu sei misericordioso\ne che hai offerto il Tuo Cuore per noi.\nEsso è incoronato di spine e da noi peccatori.\nSappiamo che Tu ci preghi ancora\naffinché non siamo perduti.\nGesù, ricordati di noi quando siamo nel peccato.' },
+    { label: 'Parte II', title: 'Consacrazione', text: 'Per mezzo del Tuo Cuore\nfa\' che tutti gli uomini si amino tra di loro.\nFa\' che scompaia in mezzo agli uomini\nl\'odio, scompaia con il Tuo Cuore.\nDimostraci il Tuo Amore.\nTi amiamo e vogliamo che Tu ci protegga\ncol Tuo Cuore di Buon Pastore.' },
+    { label: 'Parte III', title: 'Offerta', text: 'Entra in ogni cuore, Gesù!\nBussa alle porte dei nostri cuori.\nSiamo noi stessi che siamo spesso chiusi.\nAprici Tu stesso i cuori.\nFa\' che Tu sia da noi desiderato.\n\nGesù, io mi consacro al Tuo Sacro Cuore.\nPrendimi tutto: la mia anima, il mio corpo,\nla mia vita, i miei affetti.\nSii Tu il Signore della mia vita.' },
+    { label: 'Finale', title: 'Atto finale', text: 'Sacro Cuore di Gesù,\nfa\' che il Tuo regno venga\nin me e nella mia famiglia.\n\nSacro Cuore di Gesù,\nmi fido di Te.\nSacro Cuore di Gesù,\ncredo nel Tuo Amore per me.\nSacro Cuore di Gesù,\nvenga il Tuo regno.\n\nAmen.' }
+  ], fineMsg: 'La Consacrazione al Sacro Cuore di Gesù è completata.\n"Sacro Cuore di Gesù, mi fido di Te."' },
+
+  // ===== MEDJUGORJE — CONSACRAZIONE AL CUORE IMMACOLATO =====
+  'cons-cuore-immacolato': { title: '💙 Consacrazione al Cuore Immacolato di Maria', steps: [
+    { label: 'Inizio', title: 'Consacrazione al Cuore Immacolato di Maria', instruction: 'Preghiera di Medjugorje', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Parte I', title: 'Invocazione', text: 'O Maria,\nMadre di Dio e Madre nostra,\nMadre della Chiesa e Regina della Pace,\nnoi ci rivolgiamo a Te con fiducia.\n\nTu che a Medjugorje sei apparsa\nper chiamare il mondo alla conversione,\naccetta la nostra consacrazione.' },
+    { label: 'Parte II', title: 'Consacrazione', text: 'Io mi consacro totalmente a te,\no Maria Immacolata.\nTi dono il mio corpo e la mia anima,\nle mie gioie e le mie sofferenze,\nla mia vita intera.\n\nPrendi tutto ciò che sono\ne portalo al Cuore di tuo Figlio Gesù.\nSii tu a guidare i miei passi,\na formare il mio cuore a somiglianza del Tuo,\nImmacolato e pieno di grazia.' },
+    { label: 'Parte III', title: 'Affidamento', text: 'O Maria, Cuore Immacolato,\nrifugio dei peccatori,\nconsolazione degli afflitti,\nsperanza dei disperati:\n\nricevi sotto il tuo manto\nme e tutta la mia famiglia.\nPresentaci ogni giorno al Cuore di Gesù\nperché ci perdoni e ci santifichi.\n\nFa\' che io viva sempre nell\'amore di Dio\ne muoia nella sua grazia.\nAmen.' },
+    { label: 'Finale', title: 'Preghiera alla Regina della Pace', text: 'O Regina della Pace,\nnoi ti consacriamo i nostri cuori,\nle nostre famiglie, la nostra parrocchia,\nla nostra nazione e il mondo intero.\n\nPorta la pace là dove c\'è guerra,\nl\'amore dove c\'è odio,\nla speranza dove c\'è disperazione,\nla luce dove ci sono le tenebre.\n\nMaria, Regina della Pace, prega per noi!\nAmen.' }
+  ], fineMsg: 'La Consacrazione al Cuore Immacolato di Maria è completata.\nMaria, Regina della Pace, prega per noi.' },
+
+  // ===== MEDJUGORJE — MADRE DI BONTÀ =====
+  'madre-di-bonta': { title: '🌸 Madre di Bontà, d\'Amore e di Misericordia', steps: [
+    { label: 'Inizio', title: 'Madre di Bontà, d\'Amore e di Misericordia', instruction: 'Preghiera insegnata dalla Madonna a Jelena Vasilj — Medjugorje', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Preghiera', title: 'Madre di Bontà', text: 'O Madre di Bontà,\ndona la Tua Bontà a tutti noi\naffinché possiamo desiderare la bontà.\n\nO Madre dell\'Amore,\ndona il Tuo Amore a tutti noi\naffinché possiamo amare tutti come Tu ci ami.' },
+    { label: 'Preghiera', title: 'Madre di Misericordia', text: 'O Madre della Misericordia,\ndona la Tua Misericordia a tutti noi\naffinché possiamo sempre essere misericordiosi\ncon tutti coloro che ci circondano,\ncome lo sei Tu con tutti noi.\n\nO Maria, Tu sai quello di cui abbiamo bisogno;\nsai tutte le nostre sofferenze e le nostre pene,\nperché sei la Madre di tutti noi.' },
+    { label: 'Finale', title: 'Affidamento', text: 'Prega Gesù tuo Figlio,\naffinché ci aiuti a vincere tutte le nostre prove.\nVogliamo diventare Tuoi figli, Madre,\nma con i soli mezzi umani non ci riusciamo.\nEcco perché, Madre nostra, prega Tu per noi,\nayutaci ad essere Tuoi figli veri\nche per buoni esempi mostrano\nla via della Bontà,\ndella Misericordia,\ne dell\'Amore in questo mondo.\nAmen.' }
+  ], fineMsg: 'La preghiera alla Madre di Bontà è completata.\nMaria, Madre di bontà, prega per noi.' },
+
+  // ===== MEDJUGORJE — SUPPLICA A DIO =====
+  'supplica-a-dio': { title: '🙏 Supplica a Dio', steps: [
+    { label: 'Inizio', title: 'Supplica a Dio', instruction: 'Preghiera di Medjugorje', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Parte I', title: 'Adorazione', text: 'O Dio,\nTu sei così grande,\nTu sei così buono,\nTu sei l\'Amore.\n\nNoi veniamo a Te\ncome tuoi figli indegni,\nma fiduciosi nella Tua misericordia infinita.\nNon guardare i nostri peccati,\nma guarda i nostri cuori\nche vogliono amarTi e servirTi.' },
+    { label: 'Parte II', title: 'Supplica', text: 'Ti supplichiamo, o Signore,\ndi illuminarci con la Tua luce\nperché possiamo conoscere la Tua volontà.\nDonaci la forza di compierla\ncon gioia e con amore.\n\nFa\' che le nostre famiglie\nsiano luogo di pace e di amore.\nFa\' che le nostre comunità\nsiano testimonianza della Tua presenza.\nFa\' che il mondo intero\nti riconosca come Signore.' },
+    { label: 'Finale', title: 'Atto di abbandono', text: 'Signore, mi abbandono nelle Tue mani.\nFa\' di me ciò che vuoi.\nQualunque cosa Tu faccia di me,\nTi ringrazio.\nSono pronto a tutto,\naccetto tutto.\n\nPurché la Tua volontà si compia in me\ne in tutte le Tue creature,\nnon desidero altro, Signore.\nRimetto la mia anima nelle Tue mani.\nTe la dono, o Signore,\ncon tutto l\'amore del mio cuore.\nAmen.' }
+  ], fineMsg: 'La Supplica a Dio è completata.\n"Signore, mi abbandono nelle Tue mani."' },
+
+  // ===== MEDJUGORJE — PREGHIERA PER L\'AMMALATO =====
+  'preghiera-ammalato': { title: '🕊️ Preghiera per l\'Ammalato', steps: [
+    { label: 'Inizio', title: 'Preghiera per l\'Ammalato', instruction: 'Preghiera di Medjugorje per chi soffre', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Parte I', title: 'Invocazione', text: 'O Gesù, Tu che hai guarito i malati,\nTu che hai consolato gli afflitti,\nTu che hai ridato la speranza ai disperati,\nguarda con occhi di misericordia\nquesto tuo figlio (questa tua figlia) che soffre.' },
+    { label: 'Parte II', title: 'Preghiera per la guarigione', text: 'Signore Gesù,\nnella Tua misericordia infinita\nascolta questa preghiera\nper (nome dell\'ammalato).\n\nSe è nella Tua volontà,\ndonagli (donale) la guarigione del corpo.\nMa soprattutto dona la pace dell\'anima,\nla forza nella sofferenza,\nla speranza nella prova.\n\nFa\' che nella malattia\npossa sentire la Tua presenza vicina.' },
+    { label: 'Parte III', title: 'Intercessione di Maria', text: 'O Maria, Salute degli Infermi,\nTu che hai vegliato sul tuo Figlio sofferente,\nveglia su questo nostro fratello (questa nostra sorella).\n\nPorgi al tuo Figlio Gesù\nil grido del nostro cuore.\nOttienici la grazia della guarigione\no la forza di portare la croce\nunita a quella del tuo Figlio.\n\nMaria, consolatrice degli afflitti,\nprega per lui (lei). Amen.' },
+    { label: 'Finale', title: 'Atto di fede', text: 'Signore, io credo nel Tuo amore.\nIo credo che non abbandoni nessuno\nnella sofferenza.\nIo credo che la Tua grazia\nè più forte di ogni male.\n\nTi affido questo ammalato.\nFa\' Tu quello che io non posso fare.\nTu sei il medico dell\'anima e del corpo.\nIn Te confido.\nAmen.\n\nGesù, confido in Te.\nGesù, confido in Te.\nGesù, confido in Te.' }
+  ], fineMsg: 'La Preghiera per l\'Ammalato è completata.\n"Gesù, medico divino, guarisci e conforta."' },
+
+  // ===== CONSACRAZIONE DELLA FAMIGLIA A SAN GIUSEPPE =====
+  'cons-famiglia-giuseppe': { title: '⚜️ Consacrazione della Famiglia a San Giuseppe', steps: [
+    { label: 'Inizio', title: 'Consacrazione della Famiglia a San Giuseppe', instruction: 'Preghiera tradizionale per la consacrazione della famiglia', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Parte I', title: 'Invocazione', text: 'O glorioso San Giuseppe,\nsposo purissimo della Beata Vergine Maria\ne padre putativo di Nostro Signore Gesù Cristo,\nnoi ci prostriamo con umiltà ai tuoi piedi\ne ti chiediamo di accogliere la nostra famiglia\nsotto la tua potente protezione.' },
+    { label: 'Parte II', title: 'Consacrazione', text: 'A te, San Giuseppe,\nnoi consacriamo questa nostra famiglia.\nTu che hai avuto la grazia di custodire\nla Sacra Famiglia di Nazareth,\nguarda su di noi e proteggici\nda ogni pericolo dell\'anima e del corpo.\n\nCome hai vegliato su Gesù e Maria,\nveglia su di noi ogni giorno.\nAllontana da questa casa\nogni insidia del maligno,\nogni discordia e divisione,\nogni male e pericolo.' },
+    { label: 'Parte III', title: 'Affidamento', text: 'San Giuseppe, padre e custode,\nti affidiamo i nostri figli.\nGuidali sul retto cammino,\ndifendili dalle tentazioni del mondo,\nfa\' che crescano nell\'amore di Dio\ne nel rispetto dei suoi comandamenti.\n\nTi affidiamo i genitori di questa famiglia.\nDona loro saggezza e pazienza,\nforza e fedeltà,\nperché siano veri testimoni dell\'amore di Dio\npresso i loro figli.' },
+    { label: 'Parte IV', title: 'Preghiera per la pace', text: 'O San Giuseppe,\ncustode della pace domestica,\ndona alla nostra famiglia\nl\'armonia e la concordia.\nFa\' che regnino tra noi\nl\'amore vicendevole,\nl\'indulgenza reciproca,\nla gioia del perdono.\n\nFa\' che la nostra casa\nsia davvero un piccolo Nazareth\ndove Gesù, Maria e tu stesso\nsiate sempre presenti e venerati.' },
+    { label: 'Finale', title: 'Conclusione', text: 'San Giuseppe,\npatrone della Santa Chiesa universale,\nprega per noi e per la nostra famiglia,\naffinché fedeli ai nostri doveri\nvivendo in quest\'esilio,\npossiamo un giorno godere\ndella gloria eterna che ci hai meritato\ncon i tuoi meriti e la tua intercessione.\n\nSan Giuseppe, prega per noi!\nSan Giuseppe, custodisci la nostra famiglia!\nSan Giuseppe, guidaci verso Dio!\n\nAmen.' }
+  ], fineMsg: 'La Consacrazione della Famiglia a San Giuseppe è completata.\nSan Giuseppe custodisca la vostra casa.' }
 };
 
 // NOVENA MARIA CHE SCIOGLIE I NODI
@@ -662,10 +804,17 @@ const NOVENA_NODI_GIORNI = [
   { giorno: 9, meditazione: 'Maria ci porta a Gesù.', testo: 'Nel nono e ultimo giorno, Maria, come a Cana, ci indica Gesù e ci dice: "Qualunque cosa vi dica, fatela." Affidiamo a Lei tutta la nostra vita, perché ci conduca sempre più vicino al Figlio suo Gesù Cristo.' }
 ];
 
-const NOVENA_SANGUE_GIORNI = Array.from({length: 9}, (_, i) => ({
-  giorno: i+1,
-  testo: `O immensa ed eterna maestà di Dio, Santissima Trinità: Padre, Figlio e Spirito Santo, io umilissima tua creatura ti adoro e ti lodo con il Sangue preziosissimo di Gesù Cristo.\n\nTi ringrazio per tutti i benefici ricevuti, specialmente per quello della Redenzione operata per mezzo del Sangue del tuo diletto Figlio Gesù Cristo.\n\nTi offro, in espiazione dei miei peccati e di quelli di tutto il mondo, questo stesso Sangue preziosissimo.\n\nSangue di Gesù Cristo, parla in mio favore!\nSangue di Gesù Cristo, sii la mia salvezza!\nSangue di Gesù Cristo, sii la salvezza di tutto il mondo!\n\n(Giorno ${i+1} di 9 — recitare fino alla fine)`
-}));
+const NOVENA_SANGUE_GIORNI = [
+  { giorno: 1, titolo: '1° Giorno — Il Sangue della Circoncisione', testo: `O Gesù, il Tuo Sangue prezioso\nscorreva già nell\'ottavo giorno dalla tua nascita,\nnella Circoncisione, primo pegno del Tuo amore per noi.\n\nO sangue benedetto, primo frutto dell\'amore divino,\npurifica la mia anima da ogni peccato.\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\ndel Tuo diletto Figlio Gesù Cristo,\nversato nella Circoncisione,\nin espiazione dei miei peccati\ne dei peccati di tutto il mondo.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 2, titolo: '2° Giorno — Il Sangue dell\'Agonia', testo: `O Gesù, nell\'orto del Getsemani,\ntremilavano le ombre della Tua Passione\ne il Tuo Sangue bagnava la terra,\ngrondava dal Tuo adorabile viso.\n\nO angoscia di Gesù! O Sangue preziosissimo,\nsudato per la nostra salvezza!\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\nche Gesù sudò nell\'Orto degli Ulivi,\nin espiazione dei peccati contro la Tua legge,\nper chi non prega, per chi non crede,\nper i tiepidi e gli indifferenti.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 3, titolo: '3° Giorno — Il Sangue della Flagellazione', testo: `O Gesù, legato alla colonna\ne flagellato a sangue per i nostri peccati,\nognuna delle Tue piaghe è una bocca\nche ci grida la grandezza del Tuo amore.\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\ndi Gesù flagellato a sangue,\nin espiazione dei peccati della carne,\ndelle intemperanze e dei disordini del corpo,\nper la purezza della gioventù.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 4, titolo: '4° Giorno — Il Sangue della Coronazione di Spine', testo: `O Gesù, la Tua testa adorabile\nfu cinta da una corona di spine acutissime\nche penetravano nel Tuo cranio sacro.\nDa quelle spine scorreva sangue\nche rigava il Tuo volto divino.\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\ndi Gesù incoronato di spine,\nin espiazione dei peccati dell\'orgoglio,\nper l\'umiltà dei cuori,\nper la conversione dei peccatori ostinati.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 5, titolo: '5° Giorno — Il Sangue della Via Crucis', testo: `O Gesù, portando la Croce pesante\nsul Calvario tra insulti e percosse,\ncadevi e cadendo bagnavi di Sangue\nle pietre di Gerusalemme.\n\nI Tuoi passi verso la morte\nfurono segnati dal Tuo Sangue:\nciascuna caduta, un dono d\'amore.\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\nche Gesù versò portando la Croce,\npel perdono dei peccati contro la carità,\npel sollievo dei poveri e dei sofferenti,\nper la perseveranza dei cristiani nella fede.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 6, titolo: '6° Giorno — Il Sangue della Crocifissione', testo: `O Gesù, inchiodato alla Croce,\ntre ore di agonia sul legno,\nil Tuo Sangue colava dalle mani,\ndai piedi, dalle piaghe tutte.\n\nO Sangue della Redenzione!\nO prezzo infinito della nostra salvezza!\nUna sola goccia del Tuo Sangue\nbasterebbe a redimere mille mondi.\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\ndi Gesù crocifisso,\nin espiazione dei peccati del mondo intero,\npel trionfo della Santa Chiesa,\npel bene dell\'umanità intera.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 7, titolo: '7° Giorno — Il Sangue delle Cinque Piaghe', testo: `O Gesù, le Tue cinque piaghe sacre\nsono cinque fontane di grazia e di misericordia.\nLe Tue mani forate, i Tuoi piedi inchiodati,\nil Tuo costato aperto dalla lancia:\ncinque porte di salvezza per il genere umano.\n\nO Padre eterno, io Ti offro il Sangue\nche sgorgò dalle cinque piaghe di Gesù,\nper la remissione delle pene dovute ai peccati,\nper le anime del Purgatorio,\npel sollievo dei moribondi.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 8, titolo: '8° Giorno — Il Sangue e l\'Acqua del Costato', testo: `O Gesù, il soldato aprì con la lancia\nil Tuo costato adorabile\ngià morto sulla Croce.\nNe uscì Sangue e Acqua:\nsimbolo dei sacramenti della Chiesa,\nnascita della nostra Madre Santa Chiesa.\n\nO Padre eterno, io Ti offro il Sangue e l\'Acqua\nche sgorgarono dal costato di Gesù,\npel perdono dei peccati contro la fede,\nper la santità dei sacerdoti e dei consacrati,\npel ritorno dei lontani alla fede.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre` },
+  { giorno: 9, titolo: '9° Giorno — Il Sangue eucaristico', testo: `O Gesù, nell\'ultima Cena,\nprendesti il calice nelle Tue mani sante\ne dicesti: "Questo è il mio Sangue,\nversato per voi e per molti,\nin remissione dei peccati."\n\nOgni giorno sull\'altare si rinnova questo miracolo:\nil Tuo Sangue preziosissimo è ancora lì per noi.\nGrazie, Gesù, per il dono dell\'Eucaristia!\n\nO Padre eterno, io Ti offro il Sangue preziosissimo\ndi Gesù nell\'Eucaristia,\nin adorazione per tutta l\'umanità,\npel trionfo del Sacro Cuore di Gesù\ne del Cuore Immacolato di Maria\nnel mondo.\n\nSangue di Gesù, salvaci!\nSangue di Gesù, grida misericordia per noi!\n\nPadre Nostro — Ave Maria — Gloria al Padre\n\n✝ Novena terminata — "Sangue di Cristo, inebriami!"` }
+];
 
 // =====================
 // STATO APP
@@ -928,10 +1077,12 @@ function avviaNovenaGiorno(id) {
   currentPreghieraId = `novena-sangue-giorno-${prossimoGiorno}`;
   currentFineMsg = `Il ${prossimoGiorno}° giorno della Novena è completato!\nIl Preziosissimo Sangue di Gesù ti santifichi.`;
   currentSteps = [
-    { label: `Giorno ${prossimoGiorno} / 9`, title: 'Novena del Preziosissimo Sangue di Gesù', instruction: 'del Venerabile Padre Bartolomeo da Saluzzo', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
-    { label: 'Preghiera del giorno', title: `${prossimoGiorno}° Giorno`, text: g.testo },
+    { label: `Giorno ${prossimoGiorno} / 9`, title: 'Novena del Preziosissimo Sangue di Gesù', instruction: 'Tradizione del Venerabile Padre Bartolomeo da Saluzzo', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\n"Sangue di Cristo, salvaci!\nSangue di Cristo, grida misericordia per noi!"' },
+    { label: 'Meditazione', title: g.titolo || `${prossimoGiorno}° Giorno`, text: g.testo },
     { label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo },
+    { label: 'Ave Maria', title: 'Ave Maria', text: PREGHIERE_BASE.aveMaria.testo },
     { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
+    { label: 'Giaculatoria', title: 'Giaculatoria al Sangue', text: 'Sangue di Cristo, salvaci!\nSangue di Cristo, grida misericordia per noi!\nSangue di Cristo, liberaci!\n\nO Preziosissimo Sangue di Gesù,\nfonte di ogni grazia e di ogni misericordia,\nche sgorgi ancora ogni giorno sull\'altare:\naccetta questa novena\ne concedi la grazia che ti chiediamo,\nse è conforme alla Tua volontà.\nAmen.' }
   ];
   currentStep = 0;
   document.getElementById('player-title').textContent = `🩸 Novena — Giorno ${prossimoGiorno}`;
@@ -986,7 +1137,106 @@ function mostraToast(msg) {
 // =====================
 // INIT
 // =====================
+function disegnaSfondoSacro() {
+  const canvas = document.getElementById('sacred-bg');
+  const W = window.innerWidth, H = window.innerHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#d4a843';
+  ctx.fillStyle = '#d4a843';
+  ctx.lineWidth = 1.2;
+
+  // Funzione: croce latina
+  function croce(x, y, s) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    // asta verticale
+    ctx.moveTo(0, -s); ctx.lineTo(0, s);
+    // traversa
+    ctx.moveTo(-s*0.65, -s*0.25); ctx.lineTo(s*0.65, -s*0.25);
+    ctx.stroke();
+    // piccola aureola
+    ctx.beginPath();
+    ctx.arc(0, -s*0.25, s*0.18, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Funzione: giglio stilizzato
+  function giglio(x, y, s) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    // stelo
+    ctx.moveTo(0, s*0.5); ctx.lineTo(0, -s*0.1);
+    ctx.stroke();
+    // petalo sinistro
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.1);
+    ctx.bezierCurveTo(-s*0.5, -s*0.1, -s*0.6, -s*0.8, 0, -s);
+    ctx.bezierCurveTo(0, -s*0.8, 0, -s*0.4, 0, -s*0.1);
+    ctx.stroke();
+    // petalo destro (specchiato)
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.1);
+    ctx.bezierCurveTo(s*0.5, -s*0.1, s*0.6, -s*0.8, 0, -s);
+    ctx.bezierCurveTo(0, -s*0.8, 0, -s*0.4, 0, -s*0.1);
+    ctx.stroke();
+    // pistillo centrale
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.1); ctx.lineTo(0, -s*0.9);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Funzione: stella a 6 punte (Stella di Davide / Stella della Redenzione)
+  function stella(x, y, r) {
+    ctx.save();
+    ctx.translate(x, y);
+    for (let t = 0; t < 2; t++) {
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const a = (i * 120 + t * 60) * Math.PI / 180;
+        const bx = Math.cos(a) * r, by = Math.sin(a) * r;
+        const nx = Math.cos(a + Math.PI) * r * 0.5, ny = Math.sin(a + Math.PI) * r * 0.5;
+        if (i === 0) ctx.moveTo(bx, by); else ctx.lineTo(bx, by);
+        ctx.lineTo(nx, ny);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Griglia pattern: croci grandi in posizioni fisse
+  const cols = Math.ceil(W / 160) + 1;
+  const rows = Math.ceil(H / 200) + 1;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * 160 + (r % 2) * 80;
+      const y = r * 200;
+      // Alterna: croce / giglio / stella
+      const tipo = (c + r) % 3;
+      if (tipo === 0) croce(x, y, 28);
+      else if (tipo === 1) giglio(x, y, 24);
+      else stella(x, y, 16);
+    }
+  }
+
+  // Bordo decorativo dorato in alto e in basso
+  ctx.globalAlpha = 0.4;
+  ctx.lineWidth = 1;
+  // Linea doppia in alto
+  ctx.beginPath(); ctx.moveTo(0, 4); ctx.lineTo(W, 4); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, 8); ctx.lineTo(W, 8); ctx.stroke();
+  // Linea doppia in basso
+  ctx.beginPath(); ctx.moveTo(0, H-4); ctx.lineTo(W, H-4); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, H-8); ctx.lineTo(W, H-8); ctx.stroke();
+}
+
 window.addEventListener('load', () => {
+  disegnaSfondoSacro();
   initCalendario();
   aggiornaBadgeNovene();
 

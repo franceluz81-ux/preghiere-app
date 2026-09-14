@@ -3,4 +3,4 @@
 
 /sw.js
   Content-Type: application/javascript
-  Service-Worker-Allowed: /
+  Cache-Control: no-cache
