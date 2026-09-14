@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0a2e">
+<title>Le Mie Preghiere</title>
+<link rel="manifest" href="manifest.webmanifest">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+<style>
+  :root {
+    --bg: #0d0620;
+    --bg2: #1a0a2e;
+    --bg3: #241040;
+    --gold: #d4a843;
+    --gold2: #f0c865;
+    --cream: #f5eed8;
+    --text: #f0e6d3;
+    --text2: #c8b89a;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --red: #c0392b;
+    --blue: #2980b9;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== HOME ===== */
+  .home-header {
+    background: linear-gradient(180deg, #1a0a2e 0%, #0d0620 100%);
+    padding: 40px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid rgba(212,168,67,0.3);
+  }
+  .home-header .cross { font-size: 28px; color: var(--gold); display: block; margin-bottom: 6px; }
+  .home-header h1 { font-size: 26px; color: var(--gold2); letter-spacing: 1px; font-weight: normal; }
+  .home-header p { font-size: 13px; color: var(--text2); margin-top: 4px; font-style: italic; }
+
+  .santo-giorno {
+    background: linear-gradient(135deg, #241040, #1a0a2e);
+    margin: 16px;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 1px solid rgba(212,168,67,0.25);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .santo-giorno:active { transform: scale(0.98); }
+  .santo-giorno .label { font-size: 11px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
+  .santo-giorno .nome-santo { font-size: 17px; color: var(--cream); margin-top: 4px; }
+  .santo-giorno .tempo { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .notifica-banner {
+    margin: 0 16px 8px;
+    background: rgba(139,92,246,0.15);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .section-title {
+    padding: 16px 16px 8px;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 16px 16px;
+  }
+  .card {
+    background: linear-gradient(145deg, var(--bg3), var(--bg2));
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    border: 1px solid rgba(212,168,67,0.15);
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    min-height: 110px;
+    justify-content: center;
+    box-shadow: var(--shadow);
+  }
+  .card:active { transform: scale(0.96); border-color: var(--gold); }
+  .card .emoji { font-size: 32px; }
+  .card .title { font-size: 13px; color: var(--cream); line-height: 1.3; }
+  .card .sub { font-size: 11px; color: var(--text2); }
+  .card.novena-card { border-color: rgba(192,57,43,0.3); }
+  .card.novena-card .badge {
+    background: var(--red); color: white; font-size: 10px;
+    padding: 2px 7px; border-radius: 10px;
+  }
+  .card.consacrazione-card { grid-column: span 2; flex-direction: row; text-align: left; gap: 14px; min-height: 70px; padding: 14px; }
+  .card.consacrazione-card .emoji { font-size: 26px; }
+
+  /* ===== PLAYER ===== */
+  .player-header {
+    background: var(--bg2);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(212,168,67,0.2);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .btn-back {
+    background: none; border: 1px solid rgba(212,168,67,0.3); color: var(--gold);
+    padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
+  }
+  .btn-back:active { opacity: 0.7; }
+  .player-title { font-size: 16px; color: var(--cream); flex: 1; }
+
+  .progress-bar-wrap { padding: 12px 16px 0; }
+  .progress-bar-bg { background: rgba(255,255,255,0.1); border-radius: 4px; height: 4px; }
+  .progress-bar-fill { background: var(--gold); border-radius: 4px; height: 4px; transition: width 0.4s; }
+  .progress-text { font-size: 11px; color: var(--text2); text-align: right; margin-top: 4px; }
+
+  .player-body {
+    flex: 1;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .step-label {
+    font-size: 11px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .step-title {
+    font-size: 20px; color: var(--gold2); line-height: 1.3; margin-bottom: 4px;
+  }
+  .step-instruction {
+    font-size: 13px; color: var(--text2); font-style: italic; margin-bottom: 12px;
+  }
+  .step-text {
+    font-size: 18px; color: var(--cream); line-height: 1.8;
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--gold);
+    padding: 16px;
+    border-radius: 0 12px 12px 0;
+  }
+  .step-image {
+    width: 100%; border-radius: 12px; max-height: 180px;
+    object-fit: cover; opacity: 0.85;
+    background: linear-gradient(135deg, #241040, #1a0a2e);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 60px; height: 160px;
+  }
+  .ripeti-badge {
+    background: rgba(212,168,67,0.15); border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--gold);
+    display: inline-block;
+  }
+
+  .player-footer {
+    padding: 16px;
+    display: flex;
+    gap: 10px;
+    background: var(--bg2);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    position: sticky; bottom: 0;
+  }
+  .btn-prev {
+    flex: 0 0 auto;
+    background: rgba(255,255,255,0.07); border: none; color: var(--text);
+    padding: 14px 20px; border-radius: 12px; font-size: 16px; cursor: pointer;
+  }
+  .btn-next {
+    flex: 1;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border: none; color: #1a0a2e;
+    padding: 14px; border-radius: 12px; font-size: 16px; font-weight: bold;
+    cursor: pointer; font-family: 'Georgia', serif;
+  }
+  .btn-next:active { opacity: 0.85; transform: scale(0.98); }
+
+  /* GRANI DEL ROSARIO */
+  .rosario-visual {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    padding: 12px 0;
+  }
+  .grano {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; transition: all 0.3s;
+  }
+  .grano.padre { background: var(--gold); color: #1a0a2e; font-weight: bold; }
+  .grano.ave { background: rgba(139,92,246,0.4); border: 1px solid var(--accent); }
+  .grano.ave.done { background: var(--accent); }
+  .grano.gloria { background: rgba(192,57,43,0.5); border: 1px solid var(--red); }
+  .grano.current { box-shadow: 0 0 10px currentColor; transform: scale(1.3); }
+
+  /* NOVENE TRACKER */
+  .novena-giorni {
+    display: flex; gap: 6px; justify-content: center; padding: 8px 0;
+  }
+  .giorno-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border: 2px solid rgba(255,255,255,0.15);
+    color: var(--text2); cursor: pointer;
+  }
+  .giorno-dot.done { background: var(--gold); color: #1a0a2e; border-color: var(--gold); font-weight: bold; }
+  .giorno-dot.current { border-color: var(--accent2); color: var(--accent2); }
+
+  /* FINE */
+  .fine-screen {
+    text-align: center; padding: 40px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .fine-icon { font-size: 64px; }
+  .fine-title { font-size: 24px; color: var(--gold2); }
+  .fine-sub { font-size: 15px; color: var(--text2); line-height: 1.6; }
+  .btn-home {
+    margin-top: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border: none; color: #1a0a2e;
+    padding: 16px 40px; border-radius: 12px; font-size: 16px;
+    font-family: 'Georgia', serif; cursor: pointer;
+  }
+
+  /* NOVENA SELECTOR */
+  .selector-list { padding: 0 16px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .selector-item {
+    background: var(--bg3); border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 14px; padding: 16px; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.2s;
+  }
+  .selector-item:active { border-color: var(--gold); }
+  .selector-item .info { flex: 1; }
+  .selector-item .info h3 { font-size: 15px; color: var(--cream); }
+  .selector-item .info p { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .selector-item .arrow { color: var(--gold); font-size: 18px; }
+
+  /* SETTINGS */
+  .settings-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .settings-row {
+    background: var(--bg3); border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .settings-row label { font-size: 15px; color: var(--cream); }
+  .settings-row span { font-size: 13px; color: var(--text2); margin-top: 2px; display: block; }
+  input[type=time] {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(212,168,67,0.3);
+    color: var(--cream); padding: 8px 12px; border-radius: 8px; font-size: 15px;
+  }
+  .toggle {
+    width: 48px; height: 26px; background: rgba(255,255,255,0.15);
+    border-radius: 13px; position: relative; cursor: pointer; transition: background 0.3s;
+  }
+  .toggle.on { background: var(--gold); }
+  .toggle::after {
+    content: ''; width: 20px; height: 20px; background: white;
+    border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.3s;
+  }
+  .toggle.on::after { left: 25px; }
+
+  /* SCROLL */
+  .player-body::-webkit-scrollbar { width: 4px; }
+  .player-body::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 2px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(26,10,46,0.95); border: 1px solid var(--gold);
+    color: var(--cream); padding: 12px 20px; border-radius: 12px;
+    font-size: 14px; z-index: 100; opacity: 0; transition: opacity 0.3s;
+    white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== SCREEN: HOME ===== -->
+<div class="screen active" id="screen-home">
+  <div class="home-header">
+    <span class="cross">✝</span>
+    <h1>Le Mie Preghiere</h1>
+    <p>"Chiedete e vi sarà dato" — Mt 7,7</p>
+  </div>
+
+  <div class="santo-giorno" id="santo-giorno-box">
+    <div class="label">✨ Santo del Giorno</div>
+    <div class="nome-santo" id="santo-nome">Caricamento...</div>
+    <div class="tempo" id="tempo-liturgico"></div>
+  </div>
+
+  <div class="notifica-banner" id="notifica-btn">
+    🔔 Imposta promemoria preghiere
+  </div>
+
+  <div class="section-title">📿 Corone e Rosari</div>
+  <div class="grid">
+    <div class="card" onclick="avviaPreghiera('rosario')">
+      <div class="emoji">📿</div>
+      <div class="title">Santo Rosario</div>
+      <div class="sub">Misteri del giorno</div>
+    </div>
+    <div class="card" onclick="avviaPreghiera('corona-angelica')">
+      <div class="emoji">👼</div>
+      <div class="title">Corona Angelica</div>
+      <div class="sub">Con grani guidati</div>
+    </div>
+    <div class="card" onclick="avviaPreghiera('divina-misericordia')">
+      <div class="emoji">❤️</div>
+      <div class="title">Coroncina Divina Misericordia</div>
+      <div class="sub">5 decine</div>
+    </div>
+    <div class="card" onclick="avviaPreghiera('san-raffaele')">
+      <div class="emoji">🕊️</div>
+      <div class="title">Coroncina San Raffaele</div>
+      <div class="sub">Arcangelo guaritore</div>
+    </div>
+  </div>
+
+  <div class="section-title">🕯️ Novene</div>
+  <div class="grid">
+    <div class="card novena-card" onclick="apriSelezioneNovena()">
+      <div class="emoji">🌹</div>
+      <div class="title">Novena a Maria che scioglie i nodi</div>
+      <div class="badge" id="badge-nodi"></div>
+    </div>
+    <div class="card novena-card" onclick="avviaNovenaGiorno('preziosissimo-sangue')">
+      <div class="emoji">🩸</div>
+      <div class="title">Novena Preziosissimo Sangue</div>
+      <div class="badge" id="badge-sangue"></div>
+    </div>
+  </div>
+
+  <div class="section-title">🙏 Consacrazioni</div>
+  <div class="grid">
+    <div class="card consacrazione-card" onclick="avviaPreghiera('consacrazione-famiglia')">
+      <div class="emoji">🏠</div>
+      <div class="info">
+        <div class="title">Consacrazione della Famiglia al Sacro Cuore di Gesù</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('consacrazione-giuseppe')">
+      <div class="emoji">⚜️</div>
+      <div class="info">
+        <div class="title">Cuore Castissimo di San Giuseppe</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('sigillo-sangue')">
+      <div class="emoji">🛡️</div>
+      <div class="info">
+        <div class="title">Sigillo e Consacrazione al Sangue di Gesù</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('bolla-mistica')">
+      <div class="emoji">💜</div>
+      <div class="info">
+        <div class="title">La Bolla Mistica · Medjugorje</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('sacro-cuore-medjugorje')">
+      <div class="emoji">✨</div>
+      <div class="info">
+        <div class="title">Preghiere Madonna di Medjugorje (Jelena Vasilj)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">📖 Preghiere</div>
+  <div class="grid">
+    <div class="card" onclick="avviaPreghiera('sette-padre-nostro')">
+      <div class="emoji">🕊️</div>
+      <div class="title">Sette Padre Nostro</div>
+      <div class="sub">con intenzioni</div>
+    </div>
+    <div class="card" onclick="avviaPreghiera('preghiere-base')">
+      <div class="emoji">📜</div>
+      <div class="title">Preghiere di base</div>
+      <div class="sub">Padre Nostro · Ave Maria · Credo</div>
+    </div>
+  </div>
+
+  <div style="height: 32px;"></div>
+</div>
+
+<!-- ===== SCREEN: NOVENA SELECTOR ===== -->
+<div class="screen" id="screen-novena-selector">
+  <div class="player-header">
+    <button class="btn-back" onclick="mostraSchermata('home')">← Indietro</button>
+    <div class="player-title">🌹 Novena Maria che scioglie i nodi</div>
+  </div>
+  <div style="padding: 16px;">
+    <div class="novena-giorni" id="giorni-nodi"></div>
+    <p style="text-align:center; color: var(--text2); font-size: 13px; margin-top: 8px;">Tocca il giorno da pregare oggi</p>
+  </div>
+  <div class="selector-list" id="lista-giorni-nodi"></div>
+</div>
+
+<!-- ===== SCREEN: PLAYER ===== -->
+<div class="screen" id="screen-player">
+  <div class="player-header">
+    <button class="btn-back" id="btn-back-player" onclick="tornaIndietro()">← Indietro</button>
+    <div class="player-title" id="player-title"></div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    <div class="progress-text" id="progress-text"></div>
+  </div>
+  <div class="player-body" id="player-body"></div>
+  <div class="player-footer">
+    <button class="btn-prev" id="btn-prev" onclick="stepPrev()">◀</button>
+    <button class="btn-next" id="btn-next" onclick="stepNext()">Avanti →</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: FINE ===== -->
+<div class="screen" id="screen-fine">
+  <div class="fine-screen">
+    <div class="fine-icon">🙏</div>
+    <div class="fine-title">Preghiera completata</div>
+    <div class="fine-sub" id="fine-sub">Dio ti benedica e ti protegga.<br>Amen.</div>
+    <button class="btn-home" onclick="mostraSchermata('home')">Torna alla Home</button>
+    <div style="margin-top: 12px;">
+      <button class="btn-back" onclick="ripetiPreghiera()" style="padding: 12px 24px;">🔄 Ripeti</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: SETTINGS ===== -->
+<div class="screen" id="screen-settings">
+  <div class="player-header">
+    <button class="btn-back" onclick="mostraSchermata('home')">← Indietro</button>
+    <div class="player-title">🔔 Promemoria Preghiere</div>
+  </div>
+  <div class="settings-list">
+    <div class="settings-row">
+      <div>
+        <label>Preghiera del mattino</label>
+        <span>Ricordati di pregare al mattino</span>
+      </div>
+      <input type="time" id="ora-mattino" value="07:00">
+    </div>
+    <div class="settings-row">
+      <div>
+        <label>Rosario / Corona</label>
+        <span>Momento di devozione</span>
+      </div>
+      <input type="time" id="ora-rosario" value="15:00">
+    </div>
+    <div class="settings-row">
+      <div>
+        <label>Preghiera della sera</label>
+        <span>Prima di dormire</span>
+      </div>
+      <input type="time" id="ora-sera" value="21:00">
+    </div>
+    <div class="settings-row">
+      <div>
+        <label>Novena del giorno</label>
+        <span>Ricorda di completare la novena</span>
+      </div>
+      <div class="toggle" id="toggle-novena" onclick="toggleNotifica('novena')"></div>
+    </div>
+    <button class="btn-next" onclick="salvaNotifiche()" style="margin-top: 8px;">
+      💾 Salva promemoria
+    </button>
+  </div>
+</div>
+
+<script>
+// =====================
+// DATI PREGHIERE
+// =====================
+
+const PREGHIERE_BASE = {
+  padreNostro: {
+    testo: `Padre nostro, che sei nei cieli,\nsia santificato il tuo nome,\nvenga il tuo regno,\nsia fatta la tua volontà,\ncome in cielo così in terra.\nDacci oggi il nostro pane quotidiano,\ne rimetti a noi i nostri debiti\ncome anche noi li rimettiamo\nai nostri debitori,\ne non abbandonarci alla tentazione,\nma liberaci dal male.\nAmen.`
+  },
+  aveMaria: {
+    testo: `Ave o Maria, piena di grazia,\nil Signore è con te.\nTu sei benedetta fra le donne\ne benedetto è il frutto del tuo seno, Gesù.\nSanta Maria, Madre di Dio,\nprega per noi peccatori,\nadesso e nell'ora della nostra morte.\nAmen.`
+  },
+  gloriaAlPadre: {
+    testo: `Gloria al Padre e al Figlio\ne allo Spirito Santo.\nCome era nel principio,\nora e sempre,\nnei secoli dei secoli.\nAmen.`
+  },
+  fatima: {
+    testo: `O mio Gesù, perdona le nostre colpe,\npreservaci dal fuoco dell'inferno,\nporta in Paradiso tutte le anime,\nspecialmente le più bisognose\ndella tua misericordia.\nAmen.`
+  },
+  credo: {
+    testo: `Io credo in Dio, Padre onnipotente,\ncreatore del cielo e della terra.\nE in Gesù Cristo, suo unico Figlio, nostro Signore,\nche fu concepito di Spirito Santo,\nnacque da Maria Vergine,\npatì sotto Ponzio Pilato,\nfu crocifisso, morì e fu sepolto;\ndiscese agli inferi;\nil terzo giorno risuscitò da morte;\nsalì al cielo,\nsiede alla destra di Dio Padre onnipotente;\ndi là verrà a giudicare i vivi e i morti.\nCredo nello Spirito Santo,\nla santa Chiesa cattolica,\nla comunione dei santi,\nla remissione dei peccati,\nla risurrezione della carne,\nla vita eterna.\nAmen.`
+  },
+  attoContrizione: {
+    testo: `Mio Dio, mi pento e mi dolgo con tutto il cuore\ndei miei peccati,\nperché peccando ho meritato i tuoi castighi,\ne molto più perché ho offeso te,\nsommo Bene e degno di essere amato sopra ogni cosa.\nProponendo fermamente,\ncol tuo santo aiuto,\ndi non offenderti mai più\ne di fuggire le occasioni prossime di peccato.\nSignore, misericordia, perdonami.\nAmen.`
+  }
+};
+
+const MISTERI = {
+  0: { nome: 'Gloriosi', emoji: '👑', lista: ['Risurrezione di Gesù', 'Ascensione di Gesù al Cielo', 'Discesa dello Spirito Santo', 'Assunzione di Maria', 'Incoronazione di Maria Regina'] },
+  1: { nome: 'Gaudiosi', emoji: '🌸', lista: ['Annunciazione dell\'Angelo a Maria', 'Visitazione di Maria a Elisabetta', 'Nascita di Gesù a Betlemme', 'Presentazione di Gesù al Tempio', 'Ritrovamento di Gesù al Tempio'] },
+  2: { nome: 'Dolorosi', emoji: '✝️', lista: ['Agonia di Gesù nell\'orto', 'Flagellazione di Gesù alla colonna', 'Coronazione di spine', 'Gesù porta la Croce', 'Crocifissione e morte di Gesù'] },
+  3: { nome: 'Luminosi', emoji: '✨', lista: ['Battesimo di Gesù nel Giordano', 'Nozze di Cana', 'Annuncio del Regno di Dio', 'Trasfigurazione di Gesù', 'Istituzione dell\'Eucaristia'] },
+  4: { nome: 'Dolorosi', emoji: '✝️', lista: ['Agonia di Gesù nell\'orto', 'Flagellazione di Gesù alla colonna', 'Coronazione di spine', 'Gesù porta la Croce', 'Crocifissione e morte di Gesù'] },
+  5: { nome: 'Gaudiosi', emoji: '🌸', lista: ['Annunciazione dell\'Angelo a Maria', 'Visitazione di Maria a Elisabetta', 'Nascita di Gesù a Betlemme', 'Presentazione di Gesù al Tempio', 'Ritrovamento di Gesù al Tempio'] },
+  6: { nome: 'Gloriosi', emoji: '👑', lista: ['Risurrezione di Gesù', 'Ascensione di Gesù al Cielo', 'Discesa dello Spirito Santo', 'Assunzione di Maria', 'Incoronazione di Maria Regina'] }
+};
+
+function buildRosario() {
+  const dow = new Date().getDay();
+  const mis = MISTERI[dow];
+  let steps = [];
+  steps.push({ label: 'Inizio', title: 'Il Santo Rosario', instruction: `Misteri ${mis.nome} ${mis.emoji} — ${['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'][dow]}`, text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\nSignore, apri le mie labbra e la mia bocca proclamerà la tua lode.' });
+  steps.push({ label: 'Credo', title: 'Credo degli Apostoli', text: PREGHIERE_BASE.credo.testo });
+  steps.push({ label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo });
+  steps.push({ label: '3 Ave Maria', title: 'Tre Ave Maria', instruction: 'Per le virtù di fede, speranza e carità', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 });
+  steps.push({ label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo });
+
+  for (let i = 0; i < 5; i++) {
+    steps.push({ label: `${i+1}° Mistero`, title: mis.lista[i], instruction: `Meditazione del ${i+1}° Mistero ${mis.nome}`, text: `"${mis.lista[i]}"\n\nMeditiamo su questo mistero mentre preghiamo la decina.` });
+    steps.push({ label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo });
+    steps.push({ label: '10 Ave Maria', title: 'Dieci Ave Maria', instruction: `Decina del ${i+1}° mistero`, text: PREGHIERE_BASE.aveMaria.testo, ripeti: 10 });
+    steps.push({ label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo });
+    steps.push({ label: 'Fátima', title: 'Preghiera di Fátima', text: PREGHIERE_BASE.fatima.testo });
+  }
+  steps.push({ label: 'Finale', title: 'Salve Regina', text: `Salve, o Regina, madre di misericordia,\nvita, dolcezza e speranza nostra, salve.\nA te ricorriamo, esuli figli di Eva;\na te sospiriamo gementi e piangenti\nin questa valle di lacrime.\nOrsù, dunque, avvocata nostra,\nrivolgi a noi gli occhi tuoi misericordiosi,\ne mostraci, dopo questo esilio, Gesù,\nfrutto benedetto del tuo seno.\nO clemente, o pia, o dolce Vergine Maria.\nAmen.` });
+  steps.push({ label: 'Fine', title: 'Conclusione', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo.\nAmen.\n\n✝ Il Santo Rosario è terminato. Dio ti benedica.' });
+  return steps;
+}
+
+const CATALOGO = {
+  'rosario': { title: '📿 Santo Rosario', buildFn: buildRosario, fineMsg: 'Il Santo Rosario è completato.\nMaria Santissima ti benedica e protegga la tua famiglia.' },
+
+  'corona-angelica': { title: '👼 Corona Angelica', steps: [
+    { label: 'Inizio', title: 'Corona Angelica', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Invocazione', title: 'Invocazione iniziale', text: 'O Dio, vieni a salvarmi.\nSignore, vieni presto in mio aiuto.\nGloria al Padre...' },
+    { label: '1° Mistero', title: '1° — L\'Annunciazione', instruction: 'Il Signore manda l\'Arcangelo Gabriele a Maria', text: 'Ave Maria... (×3)\n\nSanto Michele Arcangelo, difendici nel combattimento, sii nostro sostegno contro le insidie e la malvagità del demonio. Amen.' },
+    { label: '2° Mistero', title: '2° — La Nascita di Gesù', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '3° Mistero', title: '3° — La Risurrezione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '4° Mistero', title: '4° — L\'Ascensione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '5° Mistero', title: '5° — La Pentecoste', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '6° Mistero', title: '6° — L\'Assunzione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: '7° Mistero', title: '7° — L\'Incoronazione', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
+    { label: 'Finale', title: 'Preghiera finale', text: 'Sotto la tua protezione cerchiamo rifugio,\nSanta Madre di Dio.\nNon disprezzare le suppliche\ndi noi che siamo nella prova,\nma liberaci da ogni pericolo,\no Vergine gloriosa e benedetta.\nAmen.' }
+  ], fineMsg: 'La Corona Angelica è terminata.\nGli Angeli del Signore ti custodiscano.' },
+
+  'divina-misericordia': { title: '❤️ Coroncina Divina Misericordia', steps: [
+    { label: 'Inizio', title: 'Coroncina della Divina Misericordia', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.\n\n"Gesù, confido in Te."' },
+    { label: 'Apertura', title: 'Preghiera di apertura', text: 'Padre Eterno, io Ti offro il Corpo e il Sangue,\nl\'Anima e la Divinità del Tuo amatissimo Figlio\ne Nostro Signore Gesù Cristo,\nin espiazione dei nostri peccati\ne di quelli del mondo intero.' },
+    { label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo },
+    { label: 'Ave Maria', title: 'Ave Maria', text: PREGHIERE_BASE.aveMaria.testo },
+    { label: 'Credo', title: 'Credo', text: PREGHIERE_BASE.credo.testo },
+    { label: '1ª Decina', title: '1ª Decina — Perle grandi', instruction: 'Per ogni perla grande (×1)', text: 'Padre Eterno, Ti offro il Corpo e il Sangue, l\'Anima e la Divinità del Tuo amatissimo Figlio e Nostro Signore Gesù Cristo, in espiazione dei nostri peccati e di quelli del mondo intero.' },
+    { label: '1ª Decina', title: '1ª Decina — Perle piccole (×10)', instruction: 'Per ogni perla piccola', text: 'Per la Sua dolorosa Passione,\nabbi misericordia di noi e del mondo intero.', ripeti: 10 },
+    { label: '2ª Decina', title: '2ª Decina — Perla grande', text: 'Padre Eterno, Ti offro il Corpo e il Sangue, l\'Anima e la Divinità del Tuo amatissimo Figlio e Nostro Signore Gesù Cristo, in espiazione dei nostri peccati e di quelli del mondo intero.' },
+    { label: '2ª Decina', title: '2ª Decina — Perle piccole (×10)', text: 'Per la Sua dolorosa Passione,\nabbi misericordia di noi e del mondo intero.', ripeti: 10 },
+    { label: '3ª Decina', title: '3ª Decina — Perla grande', text: 'Padre Eterno, Ti offro il Corpo e il Sangue, l\'Anima e la Divinità del Tuo amatissimo Figlio e Nostro Signore Gesù Cristo, in espiazione dei nostri peccati e di quelli del mondo intero.' },
+    { label: '3ª Decina', title: '3ª Decina — Perle piccole (×10)', text: 'Per la Sua dolorosa Passione,\nabbi misericordia di noi e del mondo intero.', ripeti: 10 },
+    { label: '4ª Decina', title: '4ª Decina — Perla grande', text: 'Padre Eterno, Ti offro il Corpo e il Sangue, l\'Anima e la Divinità del Tuo amatissimo Figlio e Nostro Signore Gesù Cristo, in espiazione dei nostri peccati e di quelli del mondo intero.' },
+    { label: '4ª Decina', title: '4ª Decina — Perle piccole (×10)', text: 'Per la Sua dolorosa Passione,\nabbi misericordia di noi e del mondo intero.', ripeti: 10 },
+    { label: '5ª Decina', title: '5ª Decina — Perla grande', text: 'Padre Eterno, Ti offro il Corpo e il Sangue, l\'Anima e la Divinità del Tuo amatissimo Figlio e Nostro Signore Gesù Cristo, in espiazione dei nostri peccati e di quelli del mondo intero.' },
+    { label: '5ª Decina', title: '5ª Decina — Perle piccole (×10)', text: 'Per la Sua dolorosa Passione,\nabbi misericordia di noi e del mondo intero.', ripeti: 10 },
+    { label: 'Finale', title: 'Santo, Santo, Santo (×3)', instruction: 'Ripetere tre volte', text: 'Santo Dio,\nSanto Forte,\nSanto Immortale,\nabbi pietà di noi e del mondo intero.', ripeti: 3 }
+  ], fineMsg: 'La Coroncina della Divina Misericordia è completata.\n"Gesù, confido in Te."' },
+
+  'san-raffaele': { title: '🕊️ Coroncina San Raffaele', steps: [
+    { label: 'Inizio', title: 'Coroncina in onore di San Raffaele Arcangelo', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Invocazione', title: 'O Dio, vieni a salvarmi', text: 'O Dio, vieni a salvarmi.\nSignore, vieni presto in mio aiuto.\nGloria al Padre.' },
+    { label: 'Spirito Santo', title: 'Invocazione allo Spirito Santo', text: 'Vieni, Santo Spirito, manda a noi dal cielo\nun raggio della tua luce.\nVieni, padre dei poveri, vieni,\ndatore dei doni, vieni, luce dei cuori.\nConsolatore perfetto; ospite dolce dell\'anima,\ndolcissimo sollievo.\nNella fatica, riposo, nella calura, riparo,\nnel pianto, conforto.\nO luce beatissima, invadi nell\'intimo\nil cuore dei tuoi fedeli.\nSenza la tua forza nulla è nell\'uomo,\nnulla senza colpa.\nLava ciò che è sordido, bagna ciò che è arido,\nsana ciò che sanguina.\nPiega ciò che è rigido, scalda ciò che è gelido,\ndrizza ciò che è sviato.\nDona ai tuoi fedeli che solo in te confidano\ni tuoi santi doni.\nDona virtù e premio, dona morte santa,\ndona gioia eterna. Amen.' },
+    { label: '1ª Parte', title: '1ª Parte — Gloria al Padre (×3)', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: 'Invocazione', title: 'San Raffaele Arcangelo', text: 'San Raffaele Arcangelo,\nmedio di Dio, guaritore divino,\ncompagno dei pellegrini,\nprega per noi.\n\nAmen.' },
+    { label: '2ª Parte', title: '2ª Parte — Gloria al Padre (×3)', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: 'Invocazione', title: 'Preghiera a San Raffaele', text: 'O San Raffaele Arcangelo,\nmandato da Dio a guarire Tobia\ne a liberare Sara,\ntieni lontano da noi ogni male,\nguarisci le nostre infermità\ndel corpo e dell\'anima,\naccompagnaci nel nostro cammino\nverso il Padre eterno.\nAmen.' },
+    { label: '3ª Parte', title: '3ª Parte — Gloria al Padre (×3)', text: PREGHIERE_BASE.gloriaAlPadre.testo, ripeti: 3 },
+    { label: 'Finale', title: 'Preghiera finale', text: 'Gloriosi Principi delle schiere celesti,\nSanti Michele, Gabriele e Raffaele,\nAngeli e Arcangeli,\nproteggete e guidate noi e i nostri cari\nnella via verso Dio.\nAmen.' }
+  ], fineMsg: 'La Coroncina di San Raffaele Arcangelo è terminata.\nL\'Arcangelo guaritore ti protegga.' },
+
+  'consacrazione-famiglia': { title: '🏠 Consacrazione della Famiglia', steps: [
+    { label: 'Inizio', title: 'Consacrazione della Famiglia al Sacro Cuore di Gesù', instruction: 'Testo approvato da San Pio X nel 1908', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Preghiera', title: 'Parte I', text: 'O Gesù, che hai manifestato a S. Margherita Maria il desiderio di regnare con il tuo Cuore sulle famiglie cristiane, vogliamo oggi proclamare la tua regalità d\'amore sulla nostra famiglia.\n\nNoi tutti vogliamo vivere, d\'ora innanzi, come Tu vuoi, vogliamo far fiorire nella nostra casa le virtù alle quali hai promesso la pace quaggiù.\n\nVogliamo tener lontano da noi tutti quello che è in contrasto con Te.' },
+    { label: 'Preghiera', title: 'Parte II', text: 'Tu regnerai sul nostro intelletto, per la semplicità della nostra fede; sui nostri cuori per l\'amore continuo che avremo per te e che ravviveremo ricevendo spesso la S. Comunione.\n\nDegnati, o Cuore Divino, di restare sempre in mezzo a noi, di benedire le nostre attività e i nostri lavori, di allontanare da noi le tentazioni, di santificare le nostre gioie e di alleviare i nostri dolori.' },
+    { label: 'Preghiera', title: 'Parte III', text: 'Se qualcuno di noi ti ha afflitto, o Cuore Divino, ricordati che si è mostrato debole e miserabile, meritevole di ogni tua compassione.\n\nSii per tutti noi la Via, la Verità e la Vita.\n\nE infine, quando verrà per ognuno di noi l\'ora della separazione e della morte, e lo spirito lascerà questo mondo, vogliamo comprendere dal tuo Cuore come è piccola cosa la terra in confronto dei beni del Cielo.\n\nSul trono eterno, o Gesù, ricordati che la nostra famiglia t\'appartiene: Cuore di Gesù, fa\' che la tua regalità si estenda ad ogni famiglia della terra.\nAmen.' }
+  ], fineMsg: 'La Consacrazione della Famiglia è completata.\nIl Sacro Cuore di Gesù regni nella vostra casa.' },
+
+  'consacrazione-giuseppe': { title: '⚜️ Consacrazione a San Giuseppe', steps: [
+    { label: 'Inizio', title: 'Consacrazione al Cuore Castissimo di San Giuseppe', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Preghiera', title: 'Consacrazione', text: 'Cuore Castissimo di S. Giuseppe,\nproteggi e difendi la mia famiglia\ncontro ogni male e pericolo.\n\nCuore Castissimo di S. Giuseppe,\nspargi sull\'umanità intera\nle grazie e le virtù del tuo Cuore Castissimo.\n\nSan Giuseppe io mi consegno realmente a te.\nTi consacro la mia anima e il mio corpo,\nil mio cuore e tutta la mia vita.\n\nSan Giuseppe, difendi la devozione al Sacro Cuore di Gesù\ne al Cuore Immacolato di Maria.' },
+    { label: 'Preghiera', title: 'Prosecuzione', text: 'Con le grazie del tuo Cuore Castissimo,\ndistruggi i piani di satana.\n\nBenedici tutta la Santa Chiesa,\nil Papa, i Vescovi e i Sacerdoti di tutto il mondo.\n\nVeglia su tutti i bambini del mondo,\nspecialmente gli innocenti che sono in pericolo.\n\nAiuta le famiglie cristiane a restare fedeli\nall\'amore di Dio.\n\nSan Giuseppe, padre putativo di Gesù,\nsposo purissimo di Maria,\nprega per noi ora e nell\'ora della nostra morte.\n\nAmen.' }
+  ], fineMsg: 'La Consacrazione al Cuore Castissimo di San Giuseppe è completata.' },
+
+  'sigillo-sangue': { title: '🛡️ Sigillo al Sangue di Gesù', steps: [
+    { label: 'Inizio', title: 'Sigillo e Consacrazione al Sangue di Gesù del singolo', instruction: 'Da ripetersi 3 volte in onore della Santissima Trinità', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Sigillo (×3)', title: 'Sigillo — 1ª volta', text: '"Nel nome di Gesù io sigillo me stesso, la mia famiglia, la mia casa e tutte le mie fonti di sostentamento col prezioso sangue di Gesù Cristo. Io consacro me stesso nel Sangue preziosissimo di Gesù Cristo, sotto il manto di Maria, e sotto la protezione di San Michele Arcangelo."\n\nSangue di Gesù scendi su di me e su tutta la mia famiglia.' },
+    { label: 'Sigillo (×3)', title: 'Sigillo — 2ª volta', text: '"Nel nome di Gesù io sigillo me stesso, la mia famiglia, la mia casa e tutte le mie fonti di sostentamento col prezioso sangue di Gesù Cristo. Io consacro me stesso nel Sangue preziosissimo di Gesù Cristo, sotto il manto di Maria, e sotto la protezione di San Michele Arcangelo."\n\nSangue di Gesù scendi su di me e su tutta la mia famiglia.' },
+    { label: 'Sigillo (×3)', title: 'Sigillo — 3ª volta', text: '"Nel nome di Gesù io sigillo me stesso, la mia famiglia, la mia casa e tutte le mie fonti di sostentamento col prezioso sangue di Gesù Cristo. Io consacro me stesso nel Sangue preziosissimo di Gesù Cristo, sotto il manto di Maria, e sotto la protezione di San Michele Arcangelo."\n\nSangue di Gesù scendi su di me e su tutta la mia famiglia.' },
+    { label: 'Finale', title: 'Conclusione', text: 'Gesù, ti ringrazio per il tuo Sangue prezioso\nche mi purifica, mi protegge e mi santifica.\n\nMaria, mia Madre, coprimi col tuo manto.\n\nSan Michele Arcangelo, proteggimi\nda ogni attacco del nemico.\n\nAmen.' }
+  ], fineMsg: 'Il Sigillo e la Consacrazione al Sangue di Gesù sono completati.\nIl Sangue di Cristo ti protegga.' },
+
+  'bolla-mistica': { title: '💜 La Bolla Mistica — Medjugorje', steps: [
+    { label: 'Introduzione', title: 'La Bolla Mistica: rifugiarsi nel Sangue di Gesù', instruction: 'Preghiera di protezione spirituale', text: 'Ci sono momenti in cui il cuore avverte il peso del male che circola nel mondo. A volte si tratta di incomprensioni, gelosie, parole cattive; altre volte sentiamo come un\'oppressione più sottile, che tocca la nostra casa, il nostro matrimonio, la nostra pace interiore.\n\nIn questi momenti, rifugiamoci nel Sangue di Gesù.' },
+    { label: 'Preghiera', title: 'La Bolla Mistica', text: 'Nel nome di Gesù Cristo,\nio mi avvolgo, avvolgo la mia famiglia,\nla mia casa, le mie relazioni,\nil mio lavoro e ogni mia cosa\nnella Bolla Mistica\ndel Preziosissimo Sangue di Nostro Signore Gesù Cristo.\n\nOgni male, ogni attacco spirituale,\nogni malvagità e ogni insidia del nemico\nsiano respinti dal Sangue di Cristo.\n\nSangue di Gesù, lavami.\nSangue di Gesù, purificami.\nSangue di Gesù, proteggimi.' },
+    { label: 'Invocazione', title: 'Invocazione finale', text: 'O Maria, Madre di Gesù,\nIntercedi per noi davanti al Tuo Figlio.\n\nSan Michele Arcangelo,\ndifendici nel combattimento.\n\nGesù, io confido in Te.\n\nAmen.' }
+  ], fineMsg: 'La Bolla Mistica è completata.\nIl Sangue di Cristo ti avvolga e ti protegga.' },
+
+  'sacro-cuore-medjugorje': { title: '✨ Preghiere di Medjugorje', steps: [
+    { label: 'Parte I', title: 'Preghiera di Consacrazione al Sacro Cuore di Gesù', instruction: 'Preghiere insegnate dalla Madonna di Medjugorje a Jelena Vasilj', text: 'Gesù, sappiamo che Tu sei misericordioso\ne che hai offerto il Tuo Cuore per noi.\nEsso è incoronato dalle spine e da noi peccatori.\nSappiamo che Tu ci preghi ancora\naffinché non siamo perduti.\nGesù, ricordati di noi quando siamo nel peccato.\nPer mezzo del Tuo Cuore fa\' che tutti gli uomini si amino tra di loro.\nFa\' che scompaia in mezzo agli uomini\nl\'odio, scompaia con il Tuo Cuore.\nDimostraci il Tuo Amore.\nTi amiamo e vogliamo che Tu ci protegga\ncol Tuo Cuore di Buon Pastore.\nEntra in ogni cuore, Gesù!\nBussa alle porte dei nostri cuori.\nSiamo noi stessi che siamo spesso chiusi.\nAprici Tu stesso i cuori. Fa\' che Tu sia da noi desiderato.\nAmen.' },
+    { label: 'Parte II', title: 'Preghiera per la pace', instruction: 'Secondo Medjugorje', text: 'O Dio della pace,\ndal tuo cuore riversa la pace\nnell\'anima nostra, nel cuore degli uomini,\nnelle nazioni e nel mondo intero.\n\nDacci la tua pace,\naffinché liberi da ogni angoscia\npossiamo vivere nella gioia.\n\nFa\' di noi testimoni di pace\nin questo mondo senza pace.\n\nAmen.' },
+    { label: 'Finale', title: 'Affidamento a Maria', text: 'Maria, Madre nostra e Regina della pace,\nproteggi noi e le nostre famiglie.\nGuidaci sul cammino della pace,\ndella conversione e dell\'amore.\n\nNoi ti consacriamo la nostra vita,\nle nostre famiglie, la nostra parrocchia.\n\nRicorda di noi davanti a Gesù Tuo Figlio.\n\nAmen.' }
+  ], fineMsg: 'Le preghiere di Medjugorje sono completate.\nLa Regina della Pace ti protegga.' },
+
+  'sette-padre-nostro': { title: '🕊️ Sette Padre Nostro', steps: [
+    { label: 'Inizio', title: 'Sette Padre Nostro, Sette Ave Maria e Sette Gloria', instruction: 'Preghiera di tradizione francescana', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: '1° — Umiltà', title: '1° — Per l\'Umiltà', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '2° — Povertà', title: '2° — Per la Povertà di spirito', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '3° — Penitenza', title: '3° — Per lo spirito di Penitenza', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '4° — Evangelizzazione', title: '4° — Per l\'Evangelizzazione', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '5° — Perseveranza', title: '5° — Per la Perseveranza', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '6° — Preghiera', title: '6° — Per lo spirito di Preghiera', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: '7° — Unità', title: '7° — Per l\'Unità della Chiesa', text: PREGHIERE_BASE.padreNostro.testo + '\n\nAve Maria...\nGloria al Padre...' },
+    { label: 'Finale', title: 'Conclusione', text: 'Signore Gesù, ti offriamo questi Sette Padre Nostro in onore delle Sette Parole da Te pronunciate sulla Croce.\n\nDonaci la grazia di vivere pienamente la nostra fede.\n\nAmen.' }
+  ], fineMsg: 'I Sette Padre Nostro sono completati.\nGesù ti benedica.' },
+
+  'preghiere-base': { title: '📜 Preghiere di Base', steps: [
+    { label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo },
+    { label: 'Ave Maria', title: 'Ave Maria', text: PREGHIERE_BASE.aveMaria.testo },
+    { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
+    { label: 'Credo', title: 'Credo degli Apostoli', text: PREGHIERE_BASE.credo.testo },
+    { label: 'Atto di Contrizione', title: 'Atto di Contrizione', text: PREGHIERE_BASE.attoContrizione.testo },
+    { label: 'Salve Regina', title: 'Salve Regina', text: 'Salve, o Regina, madre di misericordia,\nvita, dolcezza e speranza nostra, salve.\nA te ricorriamo, esuli figli di Eva;\na te sospiriamo gementi e piangenti\nin questa valle di lacrime.\nOrsù, dunque, avvocata nostra,\nrivolgi a noi gli occhi tuoi misericordiosi,\ne mostraci, dopo questo esilio, Gesù,\nfrutto benedetto del tuo seno.\nO clemente, o pia, o dolce Vergine Maria.\nAmen.' }
+  ], fineMsg: 'Preghiere completate. Dio ti benedica.' }
+};
+
+// NOVENA MARIA CHE SCIOGLIE I NODI
+const NOVENA_NODI_GIORNI = [
+  { giorno: 1, meditazione: 'Maria scioglie il nodo dell\'orgoglio e dell\'autosufficienza.', testo: 'Maria, donna di fede, scioglie il primo nodo: l\'orgoglio che ci allontana da Dio e dagli altri. In questo primo giorno ti chiediamo la grazia dell\'umiltà, di saper riconoscere la nostra dipendenza da Dio e il bisogno degli altri.' },
+  { giorno: 2, meditazione: 'Maria scioglie il nodo della mancanza di fede.', testo: 'Nel secondo giorno chiediamo a Maria di sciogliere il nodo della nostra poca fede. Lei che ha creduto alla parola di Dio anche quando tutto sembrava impossibile, ci ottenga la grazia di una fede più viva e più operante.' },
+  { giorno: 3, meditazione: 'Maria scioglie il nodo dei problemi familiari.', testo: 'Oggi affidiamo a Maria i nodi delle nostre famiglie: incomprensioni, litigi, distanze. Lei che è la Madre della famiglia di Nazareth interceda per le nostre case, che tornino luoghi di amore e di pace.' },
+  { giorno: 4, meditazione: 'Maria scioglie il nodo della paura e dell\'ansia.', testo: 'Quante paure ci bloccano! Paura del futuro, del giudizio degli altri, della malattia, della morte. In questo quarto giorno affidiamo a Maria le nostre paure, perché ci ottenga la pace del cuore.' },
+  { giorno: 5, meditazione: 'Maria scioglie il nodo del peccato che ci blocca.', testo: 'Il quinto giorno è dedicato alla conversione. Maria, avvocata dei peccatori, intercede per noi davanti al Figlio e ci ottiene la grazia del pentimento sincero e del perdono di Dio.' },
+  { giorno: 6, meditazione: 'Maria scioglie il nodo delle malattie e delle sofferenze.', testo: 'Oggi affidiamo a Maria le nostre malattie, le nostre sofferenze fisiche e spirituali. Lei che ai piedi della Croce ha offerto il dolore supremo, ci aiuti a vivere la nostra sofferenza unita a quella del Figlio.' },
+  { giorno: 7, meditazione: 'Maria scioglie il nodo dei legami negativi.', testo: 'Nel settimo giorno chiediamo liberazione da ogni legame che ci imprigiona: dipendenze, ossessioni, situazioni di peccato. Maria, Madre di liberazione, ottienici la grazia della vera libertà dei figli di Dio.' },
+  { giorno: 8, meditazione: 'Maria scioglie il nodo dei fallimenti e dei traumi del passato.', testo: 'Tante ferite del passato ci pesano ancora. Nell\'ottavo giorno affidiamo a Maria i nostri fallimenti, i nostri rimorsi, le ferite ricevute. Lei ci ottiene la grazia di ricominciare sempre, certi dell\'amore misericordioso di Dio.' },
+  { giorno: 9, meditazione: 'Maria ci porta a Gesù.', testo: 'Nel nono e ultimo giorno, Maria, come a Cana, ci indica Gesù e ci dice: "Qualunque cosa vi dica, fatela." Affidiamo a Lei tutta la nostra vita, perché ci conduca sempre più vicino al Figlio suo Gesù Cristo.' }
+];
+
+const NOVENA_SANGUE_GIORNI = Array.from({length: 9}, (_, i) => ({
+  giorno: i+1,
+  testo: `O immensa ed eterna maestà di Dio, Santissima Trinità: Padre, Figlio e Spirito Santo, io umilissima tua creatura ti adoro e ti lodo con il Sangue preziosissimo di Gesù Cristo.\n\nTi ringrazio per tutti i benefici ricevuti, specialmente per quello della Redenzione operata per mezzo del Sangue del tuo diletto Figlio Gesù Cristo.\n\nTi offro, in espiazione dei miei peccati e di quelli di tutto il mondo, questo stesso Sangue preziosissimo.\n\nSangue di Gesù Cristo, parla in mio favore!\nSangue di Gesù Cristo, sii la mia salvezza!\nSangue di Gesù Cristo, sii la salvezza di tutto il mondo!\n\n(Giorno ${i+1} di 9 — recitare fino alla fine)`
+}));
+
+// =====================
+// STATO APP
+// =====================
+let currentSteps = [];
+let currentStep = 0;
+let currentPreghieraId = '';
+let currentFineMsg = '';
+
+// =====================
+// CALENDARIO LITURGICO
+// =====================
+const SANTI = {
+  '1-1': 'Santa Maria Madre di Dio', '1-6': 'Epifania del Signore', '1-17': 'Sant\'Antonio Abate',
+  '1-20': 'San Sebastiano e San Fabiano', '1-24': 'San Francesco di Sales', '1-25': 'Conversione di San Paolo',
+  '1-28': 'San Tommaso d\'Aquino', '2-2': 'Presentazione del Signore', '2-3': 'San Biagio',
+  '2-11': 'Beata Vergine Maria di Lourdes', '2-14': 'San Valentino', '2-22': 'Cattedra di San Pietro',
+  '3-7': 'Sante Perpetua e Felicita', '3-17': 'San Patrizio', '3-19': 'San Giuseppe Sposo della Vergine Maria',
+  '3-25': 'Annunciazione del Signore', '4-23': 'San Giorgio', '4-25': 'San Marco Evangelista',
+  '5-1': 'San Giuseppe Lavoratore', '5-3': 'Santi Filippo e Giacomo Apostoli', '5-13': 'Beata Vergine Maria di Fatima',
+  '5-31': 'Visitazione della Beata Vergine Maria', '6-13': 'Sant\'Antonio di Padova', '6-24': 'Natività di San Giovanni Battista',
+  '6-29': 'Santi Pietro e Paolo Apostoli', '7-11': 'San Benedetto Abate', '7-22': 'Santa Maria Maddalena',
+  '7-25': 'San Giacomo Apostolo', '7-26': 'Santi Gioacchino e Anna', '8-6': 'Trasfigurazione del Signore',
+  '8-10': 'San Lorenzo Diacono e Martire', '8-15': 'Assunzione della Beata Vergine Maria',
+  '8-22': 'Beata Vergine Maria Regina', '8-24': 'San Bartolomeo Apostolo', '8-28': 'Sant\'Agostino',
+  '8-29': 'Martirio di San Giovanni Battista', '9-8': 'Natività della Beata Vergine Maria',
+  '9-12': 'Santissimo Nome di Maria', '9-14': 'Esaltazione della Santa Croce',
+  '9-15': 'Beata Vergine Maria Addolorata', '9-21': 'San Matteo Apostolo ed Evangelista',
+  '9-29': 'Santi Michele, Gabriele e Raffaele Arcangeli', '9-30': 'San Girolamo',
+  '10-1': 'Santa Teresa di Gesù Bambino', '10-2': 'Santi Angeli Custodi', '10-4': 'San Francesco d\'Assisi',
+  '10-7': 'Beata Vergine Maria del Rosario', '10-18': 'San Luca Evangelista', '10-28': 'Santi Simone e Giuda Apostoli',
+  '11-1': 'Tutti i Santi', '11-2': 'Commemorazione dei fedeli defunti', '11-9': 'Dedicazione della Basilica Lateranense',
+  '11-11': 'San Martino di Tours', '11-21': 'Presentazione della Beata Vergine Maria',
+  '11-22': 'Santa Cecilia', '11-25': 'Santa Caterina d\'Alessandria', '11-30': 'Sant\'Andrea Apostolo',
+  '12-3': 'San Francesco Saverio', '12-6': 'San Nicola di Bari', '12-8': 'Immacolata Concezione della Beata Vergine Maria',
+  '12-12': 'Nostra Signora di Guadalupe', '12-13': 'Santa Lucia', '12-25': 'Natività del Signore',
+  '12-26': 'Santo Stefano', '12-27': 'San Giovanni Apostolo', '12-28': 'Santi Innocenti',
+  '12-31': 'San Silvestro'
+};
+
+function getTempoLiturgico() {
+  const oggi = new Date();
+  const m = oggi.getMonth() + 1;
+  const d = oggi.getDate();
+  if ((m === 12 && d >= 1) || (m === 1 && d <= 6)) return 'Tempo di Avvento / Natale';
+  if (m === 2 || (m === 3 && d < 17)) return 'Tempo Ordinario';
+  if (m >= 3 && m <= 4) return 'Tempo di Quaresima / Pasqua';
+  if (m >= 5 && m <= 8) return 'Tempo Ordinario';
+  if (m >= 9 && m <= 11) return 'Tempo Ordinario';
+  return 'Tempo Ordinario';
+}
+
+function initCalendario() {
+  const oggi = new Date();
+  const key = `${oggi.getMonth()+1}-${oggi.getDate()}`;
+  const santo = SANTI[key] || 'Preghiamo con la Chiesa';
+  document.getElementById('santo-nome').textContent = santo;
+  document.getElementById('tempo-liturgico').textContent = getTempoLiturgico();
+}
+
+// =====================
+// NAVIGAZIONE
+// =====================
+function mostraSchermata(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function tornaIndietro() {
+  mostraSchermata('home');
+}
+
+// =====================
+// PLAYER
+// =====================
+function avviaPreghiera(id) {
+  const cat = CATALOGO[id];
+  if (!cat) return;
+  currentPreghieraId = id;
+  currentFineMsg = cat.fineMsg || 'Preghiera completata. Amen.';
+  currentSteps = cat.buildFn ? cat.buildFn() : [...cat.steps];
+  currentStep = 0;
+  document.getElementById('player-title').textContent = cat.title;
+  renderStep();
+  mostraSchermata('player');
+}
+
+function renderStep() {
+  const step = currentSteps[currentStep];
+  const total = currentSteps.length;
+  const pct = Math.round((currentStep / (total - 1)) * 100);
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${currentStep + 1} / ${total}`;
+
+  // Prev button
+  document.getElementById('btn-prev').disabled = currentStep === 0;
+  document.getElementById('btn-prev').style.opacity = currentStep === 0 ? '0.3' : '1';
+
+  // Next button
+  const isLast = currentStep === total - 1;
+  document.getElementById('btn-next').textContent = isLast ? '✝ Fine' : 'Avanti →';
+
+  // Body
+  const body = document.getElementById('player-body');
+  body.innerHTML = '';
+
+  if (step.label) {
+    const lbl = document.createElement('div');
+    lbl.className = 'step-label';
+    lbl.textContent = step.label;
+    body.appendChild(lbl);
+  }
+
+  const title = document.createElement('div');
+  title.className = 'step-title';
+  title.textContent = step.title;
+  body.appendChild(title);
+
+  if (step.instruction) {
+    const instr = document.createElement('div');
+    instr.className = 'step-instruction';
+    instr.textContent = step.instruction;
+    body.appendChild(instr);
+  }
+
+  if (step.ripeti) {
+    const badge = document.createElement('div');
+    badge.className = 'ripeti-badge';
+    badge.textContent = `🔁 Da ripetere × ${step.ripeti}`;
+    body.appendChild(badge);
+  }
+
+  const testo = document.createElement('div');
+  testo.className = 'step-text';
+  testo.style.whiteSpace = 'pre-line';
+  testo.textContent = step.testo || step.text || '';
+  body.appendChild(testo);
+
+  body.scrollTop = 0;
+}
+
+function stepNext() {
+  if (currentStep < currentSteps.length - 1) {
+    currentStep++;
+    renderStep();
+  } else {
+    // Fine
+    document.getElementById('fine-sub').textContent = currentFineMsg;
+    // Marca novena se applicabile
+    if (currentPreghieraId.startsWith('novena-nodi-giorno-')) {
+      const g = parseInt(currentPreghieraId.split('-').pop());
+      marcaGiornoNovena('nodi', g);
+    }
+    if (currentPreghieraId.startsWith('novena-sangue-giorno-')) {
+      const g = parseInt(currentPreghieraId.split('-').pop());
+      marcaGiornoNovena('sangue', g);
+    }
+    mostraSchermata('fine');
+  }
+}
+
+function stepPrev() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderStep();
+  }
+}
+
+function ripetiPreghiera() {
+  currentStep = 0;
+  renderStep();
+  mostraSchermata('player');
+}
+
+// =====================
+// NOVENE
+// =====================
+function getNovenaState(id) {
+  try { return JSON.parse(localStorage.getItem('novena_' + id) || '[]'); }
+  catch(e) { return []; }
+}
+
+function marcaGiornoNovena(id, giorno) {
+  const state = getNovenaState(id);
+  if (!state.includes(giorno)) state.push(giorno);
+  try { localStorage.setItem('novena_' + id, JSON.stringify(state)); } catch(e) {}
+  aggiornaBadgeNovene();
+}
+
+function aggiornaBadgeNovene() {
+  const nodi = getNovenaState('nodi');
+  const sangue = getNovenaState('sangue');
+  const bn = document.getElementById('badge-nodi');
+  const bs = document.getElementById('badge-sangue');
+  if (bn) bn.textContent = nodi.length > 0 ? `Giorno ${Math.max(...nodi)} / 9` : 'Inizia oggi';
+  if (bs) bs.textContent = sangue.length > 0 ? `Giorno ${Math.max(...sangue)} / 9` : 'Inizia oggi';
+}
+
+function apriSelezioneNovena() {
+  const state = getNovenaState('nodi');
+  const container = document.getElementById('giorni-nodi');
+  const lista = document.getElementById('lista-giorni-nodi');
+  container.innerHTML = '';
+  lista.innerHTML = '';
+
+  for (let i = 1; i <= 9; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'giorno-dot' + (state.includes(i) ? ' done' : '');
+    dot.textContent = i;
+    dot.onclick = () => avviaNovenaNodiGiorno(i);
+    container.appendChild(dot);
+  }
+
+  NOVENA_NODI_GIORNI.forEach(g => {
+    const item = document.createElement('div');
+    item.className = 'selector-item';
+    const fatto = state.includes(g.giorno);
+    item.innerHTML = `
+      <div style="font-size:24px">${fatto ? '✅' : '🌹'}</div>
+      <div class="info">
+        <h3>${g.giorno}° Giorno${fatto ? ' — completato' : ''}</h3>
+        <p>${g.meditazione}</p>
+      </div>
+      <div class="arrow">›</div>
+    `;
+    item.onclick = () => avviaNovenaNodiGiorno(g.giorno);
+    lista.appendChild(item);
+  });
+
+  mostraSchermata('novena-selector');
+}
+
+function avviaNovenaNodiGiorno(giorno) {
+  const g = NOVENA_NODI_GIORNI[giorno - 1];
+  currentPreghieraId = 'novena-nodi-giorno-' + giorno;
+  currentFineMsg = `Il ${giorno}° giorno della Novena è completato!\nMaria che scioglie i nodi, prega per noi.`;
+  currentSteps = [
+    { label: `Giorno ${giorno} / 9`, title: `Novena a Maria che scioglie i nodi`, instruction: g.meditazione, text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Meditazione', title: `${giorno}° Giorno — Meditazione`, text: g.testo },
+    { label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo },
+    { label: '3 Ave Maria', title: 'Tre Ave Maria', text: PREGHIERE_BASE.aveMaria.testo, ripeti: 3 },
+    { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
+    { label: 'Preghiera', title: 'Preghiera a Maria che scioglie i nodi', text: `O Maria che sciogli i nodi,\nti presento i nodi della mia vita.\nTu che con la tua grazia e il tuo esempio\nhai illuminato la via della liberazione,\nlibera e scioglie, ti prego, i nodi\ndella mia vita.\n\nMadre mia, io so che tu puoi farlo\nperché sei la piena di grazia.\nIo ti affido i nodi della mia vita,\nperché tu li sciolga uno per uno.\n\nAmen.` },
+    { label: 'Salve Regina', title: 'Salve Regina', text: 'Salve, o Regina, madre di misericordia,\nvita, dolcezza e speranza nostra, salve.\nA te ricorriamo, esuli figli di Eva;\na te sospiriamo gementi e piangenti\nin questa valle di lacrime.\nOrsù, dunque, avvocata nostra,\nrivolgi a noi gli occhi tuoi misericordiosi,\ne mostraci, dopo questo esilio, Gesù,\nfrutto benedetto del tuo seno.\nO clemente, o pia, o dolce Vergine Maria. Amen.' }
+  ];
+  currentStep = 0;
+  document.getElementById('player-title').textContent = `🌹 Novena — Giorno ${giorno}`;
+  renderStep();
+  mostraSchermata('player');
+}
+
+function avviaNovenaGiorno(id) {
+  const giorni = id === 'preziosissimo-sangue' ? NOVENA_SANGUE_GIORNI : [];
+  const state = getNovenaState(id === 'preziosissimo-sangue' ? 'sangue' : id);
+  const prossimoGiorno = state.length === 0 ? 1 : Math.min(Math.max(...state) + 1, 9);
+
+  const g = giorni[prossimoGiorno - 1];
+  currentPreghieraId = `novena-sangue-giorno-${prossimoGiorno}`;
+  currentFineMsg = `Il ${prossimoGiorno}° giorno della Novena è completato!\nIl Preziosissimo Sangue di Gesù ti santifichi.`;
+  currentSteps = [
+    { label: `Giorno ${prossimoGiorno} / 9`, title: 'Novena del Preziosissimo Sangue di Gesù', instruction: 'del Venerabile Padre Bartolomeo da Saluzzo', text: 'Nel nome del Padre e del Figlio e dello Spirito Santo. Amen.' },
+    { label: 'Preghiera del giorno', title: `${prossimoGiorno}° Giorno`, text: g.testo },
+    { label: 'Padre Nostro', title: 'Padre Nostro', text: PREGHIERE_BASE.padreNostro.testo },
+    { label: 'Gloria', title: 'Gloria al Padre', text: PREGHIERE_BASE.gloriaAlPadre.testo },
+  ];
+  currentStep = 0;
+  document.getElementById('player-title').textContent = `🩸 Novena — Giorno ${prossimoGiorno}`;
+  renderStep();
+  mostraSchermata('player');
+}
+
+// =====================
+// NOTIFICHE
+// =====================
+document.getElementById('notifica-btn').onclick = () => {
+  if ('Notification' in window) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        mostraSchermata('settings');
+        mostraToast('✅ Notifiche attivate!');
+      } else {
+        mostraSchermata('settings');
+      }
+    });
+  } else {
+    mostraSchermata('settings');
+  }
+};
+
+function salvaNotifiche() {
+  const mattino = document.getElementById('ora-mattino').value;
+  const rosario = document.getElementById('ora-rosario').value;
+  const sera = document.getElementById('ora-sera').value;
+  try {
+    localStorage.setItem('notifiche', JSON.stringify({ mattino, rosario, sera }));
+  } catch(e) {}
+  mostraToast('✅ Orari salvati! Torna ogni giorno per pregare.');
+  setTimeout(() => mostraSchermata('home'), 1200);
+}
+
+function toggleNotifica(id) {
+  const el = document.getElementById('toggle-' + id);
+  el.classList.toggle('on');
+}
+
+// =====================
+// TOAST
+// =====================
+function mostraToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// =====================
+// INIT
+// =====================
+window.addEventListener('load', () => {
+  initCalendario();
+  aggiornaBadgeNovene();
+
+  // Carica orari salvati
+  try {
+    const n = JSON.parse(localStorage.getItem('notifiche') || '{}');
+    if (n.mattino) document.getElementById('ora-mattino').value = n.mattino;
+    if (n.rosario) document.getElementById('ora-rosario').value = n.rosario;
+    if (n.sera) document.getElementById('ora-sera').value = n.sera;
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
