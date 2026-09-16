@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a0a2e">
 <title>Le Mie Preghiere</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 <style>
   :root {
@@ -456,7 +456,102 @@
     </div>
   </div>
 
+  <div class="section-title">🛡️ Preghiere di Protezione</div>
+  <div class="grid">
+    <div class="card consacrazione-card" onclick="avviaPreghiera('atto-fede')">
+      <div class="emoji">✝️</div>
+      <div class="info">
+        <div class="title">Atto di Fede o Credo</div>
+        <div class="sub">Contro l'oppressione diabolica</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('anima-di-cristo')">
+      <div class="emoji">🕊️</div>
+      <div class="info">
+        <div class="title">Anima di Cristo</div>
+        <div class="sub">Contro l'oppressione diabolica</div>
+      </div>
+    </div>
+    <div class="card consacrazione-card" onclick="avviaPreghiera('orazione-leone-xiii')">
+      <div class="emoji">⚜️</div>
+      <div class="info">
+        <div class="title">Orazione di Papa Leone XIII</div>
+        <div class="sub">Contro gli spiriti infernali</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">⏰ 24 Ore della Passione</div>
+  <div class="grid">
+    <div class="card consacrazione-card" onclick="mostraSchermata('ore-passione')">
+      <div class="emoji">✝️</div>
+      <div class="info">
+        <div class="title">Le 24 Ore della Passione</div>
+        <div class="sub">Luisa Piccarreta — 1 ora al giorno</div>
+      </div>
+    </div>
+  </div>
+
   <div style="height: 32px;"></div>
+</div>
+
+<!-- ===== SCREEN: 24 ORE DELLA PASSIONE ===== -->
+<div class="screen" id="screen-ore-passione">
+  <div class="player-header">
+    <button class="btn-back" onclick="mostraSchermata('home')">← Indietro</button>
+    <div class="player-title">✝️ 24 Ore della Passione</div>
+  </div>
+  <div style="padding: 20px 16px;">
+    <div style="text-align:center; margin-bottom: 20px;">
+      <div style="font-size:13px; color:var(--text2); font-style:italic; margin-bottom:8px;">Luisa Piccarreta</div>
+      <div style="font-size:12px; color:var(--text2);">1 ora al giorno — 24 giorni per completare il ciclo</div>
+    </div>
+
+    <!-- Orologio grafico -->
+    <div style="display:flex; justify-content:center; margin-bottom:24px;">
+      <canvas id="orologio-passione" width="240" height="240"></canvas>
+    </div>
+
+    <!-- Ora corrente -->
+    <div style="background: linear-gradient(135deg, #241040, #1a0a2e); border: 1px solid rgba(212,168,67,0.4); border-radius:16px; padding:20px; text-align:center; margin-bottom:16px;">
+      <div style="font-size:12px; color:var(--gold); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;">Ora di oggi</div>
+      <div id="ore-passione-numero" style="font-size:32px; color:var(--gold2); margin-bottom:4px;">—</div>
+      <div id="ore-passione-titolo" style="font-size:15px; color:var(--cream); margin-bottom:16px;">—</div>
+      <a id="ore-passione-link" href="#" target="_blank" style="display:inline-block; background:var(--gold); color:#1a0a2e; font-weight:bold; padding:12px 28px; border-radius:12px; text-decoration:none; font-size:15px;">📖 Leggi la preghiera</a>
+    </div>
+
+    <!-- Progresso -->
+    <div style="background:var(--bg3); border-radius:12px; padding:14px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-size:12px; color:var(--text2);">Completate</div>
+        <div id="ore-completate-count" style="font-size:20px; color:var(--gold2);">0 / 24</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px; color:var(--text2);">Ciclo</div>
+        <div id="ore-ciclo-count" style="font-size:20px; color:var(--accent2);">1°</div>
+      </div>
+    </div>
+
+    <!-- Pulsante avanza -->
+    <button onclick="avanzaOraPassione()" style="width:100%; background:rgba(212,168,67,0.1); border:1px solid rgba(212,168,67,0.4); color:var(--gold2); padding:14px; border-radius:12px; font-size:14px; cursor:pointer; margin-bottom:12px;">
+      ✅ Ho letto — passa alla prossima ora
+    </button>
+
+    <!-- Selettore manuale -->
+    <div style="background:var(--bg3); border-radius:12px; padding:14px 16px; margin-bottom:8px;">
+      <div style="font-size:12px; color:var(--text2); margin-bottom:10px;">📍 Imposta manualmente l'ora di partenza:</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <select id="selettore-ora" style="flex:1; background:var(--bg2); color:var(--cream); border:1px solid rgba(212,168,67,0.3); border-radius:8px; padding:10px; font-size:14px; font-family:Georgia,serif;">
+          <!-- opzioni generate da JS -->
+        </select>
+        <button onclick="impostaOraManuale()" style="background:var(--gold); color:#1a0a2e; border:none; border-radius:8px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;">Imposta</button>
+      </div>
+    </div>
+
+    <div style="font-size:11px; color:var(--text2); text-align:center;">
+      Il progresso viene salvato sul dispositivo
+    </div>
+  </div>
 </div>
 
 <!-- ===== SCREEN: NOVENA SELECTOR ===== -->
@@ -788,7 +883,20 @@ const CATALOGO = {
     { label: 'Parte III', title: 'Affidamento', text: 'San Giuseppe, padre e custode,\nti affidiamo i nostri figli.\nGuidali sul retto cammino,\ndifendili dalle tentazioni del mondo,\nfa\' che crescano nell\'amore di Dio\ne nel rispetto dei suoi comandamenti.\n\nTi affidiamo i genitori di questa famiglia.\nDona loro saggezza e pazienza,\nforza e fedeltà,\nperché siano veri testimoni dell\'amore di Dio\npresso i loro figli.' },
     { label: 'Parte IV', title: 'Preghiera per la pace', text: 'O San Giuseppe,\ncustode della pace domestica,\ndona alla nostra famiglia\nl\'armonia e la concordia.\nFa\' che regnino tra noi\nl\'amore vicendevole,\nl\'indulgenza reciproca,\nla gioia del perdono.\n\nFa\' che la nostra casa\nsia davvero un piccolo Nazareth\ndove Gesù, Maria e tu stesso\nsiate sempre presenti e venerati.' },
     { label: 'Finale', title: 'Conclusione', text: 'San Giuseppe,\npatrone della Santa Chiesa universale,\nprega per noi e per la nostra famiglia,\naffinché fedeli ai nostri doveri\nvivendo in quest\'esilio,\npossiamo un giorno godere\ndella gloria eterna che ci hai meritato\ncon i tuoi meriti e la tua intercessione.\n\nSan Giuseppe, prega per noi!\nSan Giuseppe, custodisci la nostra famiglia!\nSan Giuseppe, guidaci verso Dio!\n\nAmen.' }
-  ], fineMsg: 'La Consacrazione della Famiglia a San Giuseppe è completata.\nSan Giuseppe custodisca la vostra casa.' }
+  ], fineMsg: 'La Consacrazione della Famiglia a San Giuseppe è completata.\nSan Giuseppe custodisca la vostra casa.' },
+
+  // ===== PREGHIERE DI PROTEZIONE =====
+  'atto-fede': { title: '✝️ Atto di Fede o Credo', steps: [
+    { label: 'Atto di Fede', title: 'Atto di Fede o Credo', instruction: 'Contro l\'oppressione diabolica', text: `Mio Dio, poiché sei verità infallibile, credo tutto quello che Tu hai rivelato e la Santa Chiesa ci propone a credere. Credo in Te, unico vero Dio in tre Persone uguale e distinte, Padre, Figlio e Spirito Santo. Credo in Gesù Cristo, Figlio di Dio, incarnato, morto e risorto per noi, il quale darà a ciascuno, secondo i meriti, il premio o la pena eterna. Conforme a questa fede voglio sempre vivere.\n\nSignore, accresci la mia fede. Amen.` }
+  ], fineMsg: 'Atto di Fede completato. Che la fede ti protegga sempre.' },
+
+  'anima-di-cristo': { title: '🕊️ Anima di Cristo', steps: [
+    { label: 'Anima di Cristo', title: 'Anima di Cristo', instruction: 'Contro l\'oppressione diabolica', text: `Anima di Cristo, santificami.\n\nCorpo di Cristo, salvami.\n\nSangue di Cristo, inebriami.\n\nAcqua del costato di Cristo, lavami.\n\nPassione di Cristo, confortami.\n\nO buon Gesù, ascoltami.\n\nNascondimi entro le tue piaghe.\n\nNon permettere che io mi separi da Te. Difendimi dal nemico maligno. Nell'ora della mia morte, chiamami. Fa' che io venga a Te\n\nPer lodarti con tutti i Santi Nei secoli dei secoli. Amen.` }
+  ], fineMsg: 'Anima di Cristo completata. Cristo ti protegga.' },
+
+  'orazione-leone-xiii': { title: '⚜️ Orazione di Papa Leone XIII', steps: [
+    { label: 'Orazione', title: 'Orazione di Papa Leone XIII', instruction: 'Contro gli spiriti infernali', text: `O Dio del cielo, Dio della terra,\n\nDio degli angeli, Dio degli Arcangeli,\n\nDio dei patriarchi, Dio dei profeti,\n\nDio degli apostoli, Dio dei martiri,\n\nDio dei confessori, Dio delle vergini,\n\nDio che hai il potere di donare la vita dopo la morte e il riposo dopo la fatica,\n\ngiacché non vi è altro Dio fuori di Te,\nné ve ne può essere se non Tu,\n\nCreatore eterno di tutte le cose visibili ed invisibili, il cui regno non avrà fine;\n\numilmente Ti supplichiamo di volerci liberare\nda ogni tirannia, laccio, inganno\ne infestazione degli spiriti infernali\ne mantenercene sempre incolumi.\n\nPer Cristo, nostro Signore Amen.` }
+  ], fineMsg: 'Orazione completata. Dio ti liberi da ogni potere del maligno.' }
 };
 
 // NOVENA MARIA CHE SCIOGLIE I NODI
@@ -882,6 +990,7 @@ function mostraSchermata(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0, 0);
+  if (id === 'ore-passione') aggiornaSchermataOrePassione();
 }
 
 function tornaIndietro() {
@@ -1122,6 +1231,143 @@ function salvaNotifiche() {
 function toggleNotifica(id) {
   const el = document.getElementById('toggle-' + id);
   el.classList.toggle('on');
+}
+
+// =====================
+// 24 ORE DELLA PASSIONE
+// =====================
+const ORE_PASSIONE = [
+  { ora: 1,  titolo: '1ª Ora — dalle 5 alle 6 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/01ª-ora-dalle-5-alle-6-del-pomeriggio-1/' },
+  { ora: 2,  titolo: '2ª Ora — dalle 6 alle 7 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/02ª-ora-dalle-6-alle-7-del-pomeriggio-1/' },
+  { ora: 3,  titolo: '3ª Ora — dalle 7 alle 8 della sera', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/03ª-ora-dalle-7-alle-8-della-sera-1/' },
+  { ora: 4,  titolo: '4ª Ora — dalle 8 alle 9 della sera', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/04ª-ora-dalle-8-alle-9-della-sera-2/' },
+  { ora: 5,  titolo: '5ª Ora — dalle 9 alle 10 della notte', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/05ª-ora-dalle-9-alle-10-della-notte/' },
+  { ora: 6,  titolo: '6ª Ora — dalle 10 alle 11 della notte', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/06ª-ora-dalle-10-alle-11-della-notte/' },
+  { ora: 7,  titolo: '7ª Ora — dalle 11 alla mezzanotte', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/07ª-ora-dalle-11-alla-mezzanotte-3/' },
+  { ora: 8,  titolo: '8ª Ora — dalla mezzanotte all\'una', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/08ª-ora-dalla-mezzanotte-all-una-1/' },
+  { ora: 9,  titolo: '9ª Ora — dall\'una alle 2 di notte', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/09ª-ora-dall-una-alle-2-di-notte/' },
+  { ora: 10, titolo: '10ª Ora — dalle 2 alle 3 di notte', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/10ª-ora-dalle-2-alle-3-di-notte/' },
+  { ora: 11, titolo: '11ª Ora — dalle 3 alle 4 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/11ª-ora-dalle-3-alle-4-del-mattino-1/' },
+  { ora: 12, titolo: '12ª Ora — dalle 4 alle 5 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/12ª-ora-dalle-4-alle-5-del-mattino/' },
+  { ora: 13, titolo: '13ª Ora — dalle 5 alle 6 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/13ª-ora-dalle-5-alle-6-del-mattino-1/' },
+  { ora: 14, titolo: '14ª Ora — dalle 6 alle 7 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/14ª-ora-dalle-6-alle-7-del-mattino/' },
+  { ora: 15, titolo: '15ª Ora — dalle 7 alle 8 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/15ª-ora-dalle-7-alle-8-del-mattino/' },
+  { ora: 16, titolo: '16ª Ora — dalle 8 alle 9 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/16ª-ora-dalle-8-alle-9-del-mattino/' },
+  { ora: 17, titolo: '17ª Ora — dalle 9 alle 10 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/17ª-ora-dalle-9-alle-10-del-mattino/' },
+  { ora: 18, titolo: '18ª Ora — dalle 10 alle 11 del mattino', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/18ª-ora-dalle-10-alle-11-del-mattino-1/' },
+  { ora: 19, titolo: '19ª Ora — dalle 11 a mezzogiorno', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/19ª-ora-dalle-11-a-mezzogiorno/' },
+  { ora: 20, titolo: '20ª Ora — da mezzogiorno all\'una', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/20ª-ora-da-mezzogiorno-all-una/' },
+  { ora: 21, titolo: '21ª Ora — dall\'una alle 2 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/21ª-ora-dall-una-alle-2-del-pomeriggio/' },
+  { ora: 22, titolo: '22ª Ora — dalle 2 alle 3 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/22ª-ora-dalle-2-alle-3-del-pomeriggio/' },
+  { ora: 23, titolo: '23ª Ora — dalle 3 alle 4 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/23ª-ora-dalle-3-alle-4-del-pomeriggio-1/' },
+  { ora: 24, titolo: '24ª Ora — dalle 4 alle 5 del pomeriggio', url: 'https://www.ladivinavolonta.it/gli-scritti-di-luisa-piccarreta/le-24-ore-della-passione-di-nostro-signore-gesù-cristo/24ª-ora-dalle-4-alle-5-del-pomeriggio/' }
+];
+
+function getOraPassioneCorrente() {
+  try { return parseInt(localStorage.getItem('ore-passione-corrente') || '1'); } catch(e) { return 1; }
+}
+function getCicloPassione() {
+  try { return parseInt(localStorage.getItem('ore-passione-ciclo') || '1'); } catch(e) { return 1; }
+}
+
+function avanzaOraPassione() {
+  let ora = getOraPassioneCorrente();
+  let ciclo = getCicloPassione();
+  if (ora >= 24) { ora = 1; ciclo++; } else { ora++; }
+  try {
+    localStorage.setItem('ore-passione-corrente', ora);
+    localStorage.setItem('ore-passione-ciclo', ciclo);
+  } catch(e) {}
+  aggiornaSchermataOrePassione();
+  mostraToast('✅ Ora avanzata! Domani leggi la ' + ora + 'ª ora.');
+}
+
+function disegnaOrologioPassione(oraCorrente) {
+  const canvas = document.getElementById('orologio-passione');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 120, cy = 120, r = 100;
+  ctx.clearRect(0, 0, 240, 240);
+
+  // Sfondo cerchio
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.fillStyle = '#1a0a2e'; ctx.fill();
+  ctx.strokeStyle = 'rgba(212,168,67,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+
+  // 24 settori
+  for (let i = 0; i < 24; i++) {
+    const angStart = (i / 24) * Math.PI * 2 - Math.PI / 2;
+    const angEnd = ((i + 1) / 24) * Math.PI * 2 - Math.PI / 2;
+    const isActive = (i + 1) === oraCorrente;
+    const isPast = (i + 1) < oraCorrente;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r - 4, angStart, angEnd);
+    ctx.closePath();
+    if (isActive) ctx.fillStyle = 'rgba(212,168,67,0.8)';
+    else if (isPast) ctx.fillStyle = 'rgba(139,92,246,0.3)';
+    else ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fill();
+    ctx.strokeStyle = '#0d0620'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  // Cerchio interno
+  ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI*2);
+  ctx.fillStyle = '#0d0620'; ctx.fill();
+  ctx.strokeStyle = 'rgba(212,168,67,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+
+  // Numero ora al centro
+  ctx.fillStyle = '#f0c865';
+  ctx.font = 'bold 28px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(oraCorrente + 'ª', cx, cy - 8);
+  ctx.font = '11px Georgia';
+  ctx.fillStyle = '#c8b89a';
+  ctx.fillText('ora', cx, cy + 14);
+
+  // Lancetta
+  const ang = ((oraCorrente - 1) / 24) * Math.PI * 2 - Math.PI / 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(ang) * 70, cy + Math.sin(ang) * 70);
+  ctx.strokeStyle = '#d4a843'; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2);
+  ctx.fillStyle = '#d4a843'; ctx.fill();
+}
+
+function impostaOraManuale() {
+  const sel = document.getElementById('selettore-ora');
+  const ora = parseInt(sel.value);
+  try {
+    localStorage.setItem('ore-passione-corrente', ora);
+  } catch(e) {}
+  aggiornaSchermataOrePassione();
+  mostraToast('✅ Impostata la ' + ora + 'ª ora!');
+}
+
+function aggiornaSchermataOrePassione() {
+  const ora = getOraPassioneCorrente();
+  const ciclo = getCicloPassione();
+  const dati = ORE_PASSIONE[ora - 1];
+  document.getElementById('ore-passione-numero').textContent = ora + 'ª Ora';
+  document.getElementById('ore-passione-titolo').textContent = dati.titolo;
+  document.getElementById('ore-passione-link').href = dati.url;
+  document.getElementById('ore-completate-count').textContent = (ora - 1) + ' / 24';
+  document.getElementById('ore-ciclo-count').textContent = ciclo + '°';
+  disegnaOrologioPassione(ora);
+
+  // Popola selettore e sincronizza
+  const sel = document.getElementById('selettore-ora');
+  if (sel && sel.options.length === 0) {
+    ORE_PASSIONE.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.ora;
+      opt.textContent = o.ora + 'ª — ' + o.titolo.split('—')[1].trim();
+      sel.appendChild(opt);
+    });
+  }
+  if (sel) sel.value = ora;
 }
 
 // =====================
